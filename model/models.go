@@ -37,8 +37,10 @@ type Bid struct {
 
 // Notification represents the notifications table.
 type Notification struct {
-	ID        int64     `gorm:"primaryKey;autoIncrement" json:"id"`
-	UserID    int64     `gorm:"not null" json:"user_id"`
-	Message   string    `gorm:"type:text;not null" json:"message"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	ID          int64      `gorm:"primaryKey;autoIncrement" json:"id"`
+	UserID      int64      `gorm:"not null" json:"user_id"`
+	Message     string     `gorm:"type:text;not null" json:"message"`
+	IsDelivered bool       `gorm:"not null" json:"is_delivered"`
+	CreatedAt   time.Time  `gorm:"autoCreateTime" json:"created_at"`
+	DeliveredAt *time.Time `json:"delivered_at"`
 }

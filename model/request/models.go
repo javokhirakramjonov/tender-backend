@@ -16,3 +16,8 @@ type UpdateUserReq struct {
 	FullName string `json:"full_name"`
 	Email    string `json:"email"`
 }
+
+type CreateNotificationReq struct {
+	UserID  int64  `json:"user_id"`
+	Message string `json:"message"`
+}
