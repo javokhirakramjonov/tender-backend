@@ -1,5 +1,7 @@
 package request_model
 
+import "time"
+
 type CreateUserReq struct {
 	FullName string `json:"full_name"`
 	Password string `json:"password"`
@@ -21,4 +23,19 @@ type CreateBidReq struct {
 	Price        float64 `json:"price"`
 	DeliveryTime int     `json:"delivery_time"`
 	Comments     string  `json:"comments"`
+}
+
+type CreateTenderReq struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Deadline    time.Time `json:"deadline"`
+	Budget      float64 `json:"budget"`
+}
+
+type UpdateTenderReq struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Deadline    time.Time `json:"deadline"`
+	Budget      float64 `json:"budget"`
+	Status      string `json:"status"`
 }
