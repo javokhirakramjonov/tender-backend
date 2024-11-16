@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func JWTMiddleware(config *config.Config) gin.HandlerFunc {
+func JWTMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -19,7 +19,7 @@ func JWTMiddleware(config *config.Config) gin.HandlerFunc {
 
 		accessToken := authHeader
 
-		claims, err := token.ExtractClaim(config.SecretKey, accessToken)
+		claims, err := token.ExtractClaim(config.GlobalConfig.SecretKey, accessToken)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims", "details": err.Error()})
 			c.Abort()

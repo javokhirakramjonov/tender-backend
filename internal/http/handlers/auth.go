@@ -49,7 +49,7 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 		return
 	}
 
-	token := token.GenerateJWTToken(config.GlobalConfig, int64(user.ID))
+	token := token.GenerateJWTToken(int64(user.ID))
 
 	fmt.Println("New account registered to the system: ", req.Email)
 	c.JSON(http.StatusCreated, token)
@@ -85,7 +85,7 @@ func (h *HTTPHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token := token.GenerateJWTToken(config.GlobalConfig, int64(user.ID))
+	token := token.GenerateJWTToken(int64(user.ID))
 
 	c.JSON(http.StatusOK, token)
 }
