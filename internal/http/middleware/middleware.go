@@ -17,7 +17,7 @@ func JWTMiddleware(config *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		valid, err := token.ValidateToken(config, authHeader)
+		valid, err := token.ValidateToken(config.SecretKey, authHeader)
 		if err != nil || !valid {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
 			c.Abort()
@@ -26,14 +26,7 @@ func JWTMiddleware(config *config.Config) gin.HandlerFunc {
 
 		accessToken := authHeader
 
-		valid, err = token.ValidateToken(config, accessToken)
-		if err != nil || !valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
-			c.Abort()
-			return
-		}
-
-		claims, err := token.ExtractClaim(config, accessToken)
+		claims, err := token.ExtractClaim(config.SecretKey, accessToken)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims", "details": err.Error()})
 			c.Abort()

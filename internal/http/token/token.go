@@ -30,17 +30,17 @@ func GenerateJWTToken(config *config.Config, userID string, email string) *Token
 	}
 }
 
-func ValidateToken(config *config.Config, tokenStr string) (bool, error) {
-	_, err := ExtractClaim(config, tokenStr)
+func ValidateToken(secretKey string, tokenStr string) (bool, error) {
+	_, err := ExtractClaim(secretKey, tokenStr)
 	if err != nil {
 		return false, err
 	}
 	return true, nil
 }
 
-func ExtractClaim(config *config.Config, tokenStr string) (jwt.MapClaims, error) {
+func ExtractClaim(secretKey string, tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.SecretKey), nil
+		return []byte(secretKey), nil
 	})
 	if err != nil {
 		return nil, errors.New("parsing token:" + err.Error())
