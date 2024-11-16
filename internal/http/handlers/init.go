@@ -1,11 +1,17 @@
 package handlers
 
+import (
+	"tender-backend/server"
+
+	"gorm.io/gorm"
+)
+
 type HTTPHandler struct {
-	US string
+	UserService *server.UserService
 }
 
-func NewHandler() *HTTPHandler {
+func NewHandler(db *gorm.DB) *HTTPHandler {
 	return &HTTPHandler{
-		US: "not implemented",
+		UserService: server.NewUserService(db),
 	}
 }

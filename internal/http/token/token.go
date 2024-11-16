@@ -13,7 +13,7 @@ type Tokens struct {
 	AccessToken string `json:"access_token"`
 }
 
-func GenerateJWTToken(config *config.Config, userID string) *Tokens {
+func GenerateJWTToken(config *config.Config, userID int64) *Tokens {
 	accessToken := jwt.New(jwt.SigningMethodHS256)
 	claims := accessToken.Claims.(jwt.MapClaims)
 	claims["user_id"] = userID

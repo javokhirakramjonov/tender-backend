@@ -23,13 +23,15 @@ type Config struct {
 	GRPCUrl   string
 }
 
-func LoadConfig() *Config {
+var GlobalConfig *Config
+
+func LoadConfig() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	return &Config{
+	GlobalConfig = &Config{
 		SecretKey: os.Getenv("JWT_SECRET_KEY"),
 		DB: DBConfig{
 			DBHost:     os.Getenv("DB_HOST"),

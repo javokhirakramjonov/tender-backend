@@ -14,20 +14,20 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDB(cnf config.DBConfig) {
+func ConnectDB() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=%s",
-		cnf.DBHost,
-		cnf.DBUser,
-		cnf.DBPassword,
-		cnf.DBName,
-		cnf.DBPort,
-		cnf.SSLMode,
-		cnf.TimeZone,
+		config.GlobalConfig.DB.DBHost,
+		config.GlobalConfig.DB.DBUser,
+		config.GlobalConfig.DB.DBPassword,
+		config.GlobalConfig.DB.DBName,
+		config.GlobalConfig.DB.DBPort,
+		config.GlobalConfig.DB.SSLMode,
+		config.GlobalConfig.DB.TimeZone,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{

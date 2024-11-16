@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"tender-backend/config"
 	"tender-backend/internal/http/token"
-	"tender-backend/model"
+	request_model "tender-backend/model/request"
 
 	"net/http"
 
@@ -23,7 +23,7 @@ import (
 // @Failure 500 {object} string "Server error"
 // @Router /register [post]
 func (h *HTTPHandler) Register(c *gin.Context) {
-	var req model.User
+	var req request_model.CreateUserReq
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Invalid request payload": err.Error()})
 		return
@@ -42,16 +42,14 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 	}
 
 	req.Password = hashedPassword
+	user, err := h.UserService.CreateUser(&req)
+	if err != nil {
+		fmt.Printf("Error creating user: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Server error", "err": err.Error()})
+		return
+	}
 
-	// user, err := h.US.CreateUser(c, &req)
-	// if err != nil {
-	// 	fmt.Printf("Error creating user: %v", err)
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Server error", "err": err.Error()})
-	// 	return
-	// }
-
-	cf := config.LoadConfig()
-	tokens := token.GenerateJWTToken(cf, string(req.ID)) // not implemented
+	tokens := token.GenerateJWTToken(config.GlobalConfig, int64(user.ID))
 
 	fmt.Println("New account registered to the system: ", req.Email)
 	c.JSON(http.StatusCreated, tokens)
@@ -69,26 +67,25 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 // @Failure 401 {object} string "Invalid email or password"
 // @Router /login [post]
 func (h *HTTPHandler) Login(c *gin.Context) {
-	req := model.User{}
+	req := request_model.LoginUserReq{}
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"Invalid request payload": err.Error()})
 		return
 	}
 
-	// user, err := h.US.GetUserByEmail(c, req.Email)
-	// if err != nil {
-	// 	fmt.Printf("Error fetching user: %v", err)
-	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "User registered with this email not found"})
-	// 	return
-	// }
+	user, err := h.UserService.GetUserByEmail(req.Email)
+	if err != nil {
+		fmt.Printf("Error fetching user: %v", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User registered with this email not found"})
+		return
+	}
 
-	// if !config.CheckPasswordHash(req.Password, user.Password) {
-	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-	// 	return
-	// }
+	if !config.CheckPasswordHash(req.Password, user.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		return
+	}
 
-	cf := config.LoadConfig()
-	tokens := token.GenerateJWTToken(cf, string(req.ID)) // not implemented
+	token := token.GenerateJWTToken(config.GlobalConfig, int64(user.ID))
 
-	c.JSON(http.StatusOK, tokens)
+	c.JSON(http.StatusOK, token)
 }
