@@ -21,7 +21,7 @@ type Tender struct {
 	Description string    `gorm:"type:text;not null" json:"description"`
 	Deadline    time.Time `gorm:"not null" json:"deadline"`
 	Budget      float64   `gorm:"not null" json:"budget"`
-	Status      string    `gorm:"size:50;not null;check:status IN ('open', 'closed', 'pending', awarded')" json:"status"` // Restrict status to predefined values
+	Status      string    `gorm:"size:50;not null;check:status IN ('open', 'closed', 'pending', 'awarded')" json:"status"` // Restrict status to predefined values
 }
 
 // Bid represents the bids table.
