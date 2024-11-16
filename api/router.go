@@ -40,7 +40,7 @@ func NewGinRouter(cfg *config.Config) *gin.Engine {
 	tendergroup.Use(token.JWTMiddleware(cfg))
 
 	tendergroup.POST("", defHandler)
-	tendergroup.GET("/:challenge_id", defHandler)
+	tendergroup.GET("/:id", defHandler)
 	tendergroup.GET("", defHandler)
 	tendergroup.PUT("/:id", defHandler)
 	tendergroup.DELETE("/:id", defHandler)
