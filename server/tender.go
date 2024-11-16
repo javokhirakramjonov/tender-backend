@@ -81,7 +81,6 @@ func (t *TenderService) GetTenders() ([]model.Tender, error) {
 }
 
 func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_model.UpdateTenderReq) (*model.Tender, error) {
-	// Validate that the tender belongs to the user
 	if err := t.ValidateTenderBelongsToUser(tenderID, clientID); err != nil {
 		return nil, err
 	}
@@ -94,12 +93,9 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 		return nil, err
 	}
 
-	if tender.Status == "closed" || tender.Status == "awarded" {
-		return nil, errors.New("updates are not allowed for tenders with 'closed' or 'awarded' status")
-	}
-
-	if tender.Status == "open" && req.Status != "open" && req.Status != "closed" {
-		return nil, errors.New("status can only be changed from 'open' to 'closed'")
+	// Validate the update with the new validation function
+	if err := ValidateTenderUpdate(tender.Status, req.Status); err != nil {
+		return nil, err
 	}
 
 	// Update the tender fields
@@ -116,6 +112,20 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 
 	return &tender, nil
 }
+
+func ValidateTenderUpdate(existingStatus, newStatus string) error {
+	if existingStatus == "closed" || existingStatus == "awarded" {
+		return errors.New("updates are not allowed for tenders with 'closed' or 'awarded' status")
+	}
+
+	// Allow status transitions only from "open" to "closed"
+	if existingStatus == "open" && newStatus != "open" && newStatus != "closed" {
+		return errors.New("status can only be changed from 'open' to 'closed'")
+	}
+
+	return nil
+}
+
 
 
 // DeleteTender deletes a tender by its ID.
