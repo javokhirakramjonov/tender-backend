@@ -56,7 +56,7 @@ func (s *UserService) GetUserByID(id uint) (*model.User, error) {
 
 	return &user, nil
 }
-
+ 
 func (s *UserService) UpdateUser(user *request_model.UpdateUserReq, id uint) (*model.User, error) {
 	var existingUser model.User
 	if err := s.db.First(&existingUser, id).Error; err != nil {
