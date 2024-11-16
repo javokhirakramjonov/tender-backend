@@ -7,18 +7,16 @@ import (
 	"github.com/gin-gonic/gin"
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	// _ "tender-backend/docs"
 )
 
-// NewGinRouter creates a new gin router with the specified RpcClientManager
-// @Title RYG API Gateway
+// NewGinRouter creates a new gin router with the specified NewGinRouter
+// @Title Tender API Gateway
 // @Version 1.0
-// @Description This is the API Gateway for the RYG project.
+// @Description This is the API Gateway for the Tender project.
 // @SecurityDefinitions.apikey BearerAuth
 // @In header
 // @Name Authorization
 func NewGinRouter(cfg *config.Config) *gin.Engine {
-	
 	router := gin.Default()
 	swaggerUrl := ginSwagger.URL("swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler, swaggerUrl))
@@ -26,14 +24,14 @@ func NewGinRouter(cfg *config.Config) *gin.Engine {
 	defHandler := func(c *gin.Context){}
 
 	// Auth routes
-	router.POST("/login", )
+	router.POST("/login", defHandler) 
 	router.POST("/register", defHandler)
 
 	// User routes
 	userGroup := router.Group("/users").Use(token.JWTMiddleware(cfg))
-	userGroup.GET("", defHandler)
-	userGroup.PUT("", defHandler)
-	userGroup.DELETE("", defHandler)
+	userGroup.GET("/:id", defHandler)
+	userGroup.PUT("/:id", defHandler)
+	userGroup.DELETE("/:id", defHandler)
 
 	// Tenders routes
 	tendergroup := router.Group("/tenders")
@@ -52,10 +50,8 @@ func NewGinRouter(cfg *config.Config) *gin.Engine {
 	bidGroup.GET("/:id", defHandler)
 
 	// Awards routes
-	awardGroup := tendergroup.Group("/:id/awards:bid_id")
+	awardGroup := tendergroup.Group("/:id/awards")
 	awardGroup.POST("", defHandler)
-
-
 
 
 	return router
