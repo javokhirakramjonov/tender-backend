@@ -37,10 +37,10 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	// Auth routes
 	router.POST("/login", h.Login)
 	router.POST("/register", h.Register)
+	router.GET("/users/:id", h.GetUserByID)
 
 	// User routes (protected)
 	userGroup := router.Group("/users").Use(middleware.JWTMiddleware())
-	userGroup.GET("/:id", h.GetUserByID)
 	userGroup.PUT("/:id", h.UpdateUser)
 	userGroup.DELETE("/:id", h.DeleteUser)
 

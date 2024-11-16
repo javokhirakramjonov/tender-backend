@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	request_model "tender-backend/model/request"
+	response_model "tender-backend/model/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,17 +21,27 @@ import (
 // @Failure 404 {object} string "User not found"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
-// @Router /users [GET]
+// @Router /users/{id} [GET]
 func (h *HTTPHandler) GetUserByID(c *gin.Context) {
-	id := c.GetInt64("user_id")
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
 
-	user, err := h.UserService.GetUserByID(id)
+	user, err := h.UserService.GetUserByID(int64(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user", "details": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, user)
+	userRes := &response_model.ProfileRes{
+		ID:       user.ID,
+		FullName: user.FullName,
+		Email:    user.Email,
+		Role:     user.Role,
+	}
+	c.JSON(http.StatusOK, userRes)
 }
 
 // UpdateUser godoc

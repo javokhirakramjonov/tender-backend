@@ -18,8 +18,8 @@ func NewBidService(db *gorm.DB) *BidService {
 }
 
 func (s *BidService) CreateBid(req *request_model.CreateBidReq, tenderID int64, contractorID int64) (*model.Bid, error) {
-	if req.DeliveryTime <= 0 {
-		return nil, errors.New("delivery time must be greater than 0")
+	if err := s.validateCreateBidRequest(req); err != nil {
+		return nil, err
 	}
 
 	var tender model.Tender
@@ -69,4 +69,12 @@ func (s *BidService) GetAllBids() ([]model.Bid, error) {
 	}
 
 	return bids, nil
+}
+
+func (s *BidService) validateCreateBidRequest(req *request_model.CreateBidReq) error {
+	if req.Price <= 0 {
+		return errors.New("price must be greater than zero")
+	}
+
+	return nil
 }
