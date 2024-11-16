@@ -90,17 +90,6 @@ func (h *HTTPHandler) GetTenders(ctx *gin.Context) {
 // @Param tender body request_model.UpdateTenderReq true "Tender information"
 // @Success 200 {object} model.Tender
 // @Router /tenders/{tender_id} [put]
-// UpdateTender godoc
-// @Security BearerAuth
-// @Summary Update a tender by ID
-// @Description Update a tender by ID
-// @Tags tender
-// @Accept json
-// @Produce json
-// @Param tender_id path int true "Tender ID"
-// @Param tender body request_model.UpdateTenderReq true "Tender information"
-// @Success 200 {object} model.Tender
-// @Router /tenders/{tender_id} [put]
 func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 	// Get tender ID from the path
 	tenderID, err := strconv.Atoi(ctx.Param("tender_id"))
@@ -109,13 +98,7 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 		return
 	}
 
-	// Extract clientID from the request (e.g., via middleware or context).
-	// This is a placeholder, adapt it based on your authentication system.
-	clientID, exists := ctx.Get("clientID")
-	if !exists {
-		ctx.JSON(401, gin.H{"error": "Unauthorized"})
-		return
-	}
+	userID  := ctx.GetInt64("userID")
 
 	// Bind the request JSON to the UpdateTenderReq struct
 	req := request_model.UpdateTenderReq{}
@@ -125,7 +108,7 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 	}
 
 	// Call the service method
-	res, err := h.TenderService.UpdateTender(int64(tenderID), clientID.(int64), &req)
+	res, err := h.TenderService.UpdateTender(int64(tenderID), userID, &req)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -144,14 +127,6 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 // @Param tender_id path int true "Tender ID"
 // @Success 204
 // @Router /tenders/{tender_id} [delete]
-// DeleteTender godoc
-// @Security BearerAuth
-// @Summary Delete a tender by ID
-// @Description Delete a tender by ID
-// @Tags tender
-// @Param tender_id path int true "Tender ID"
-// @Success 204
-// @Router /tenders/{tender_id} [delete]
 func (h *HTTPHandler) DeleteTender(ctx *gin.Context) {
 	// Get tender ID from the path
 	tenderID, err := strconv.Atoi(ctx.Param("tender_id"))
@@ -160,15 +135,8 @@ func (h *HTTPHandler) DeleteTender(ctx *gin.Context) {
 		return
 	}
 
-	// Extract clientID from the request (e.g., via middleware or context).
-	clientID, exists := ctx.Get("clientID")
-	if !exists {
-		ctx.JSON(401, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	// Call the service method
-	err = h.TenderService.DeleteTender(int64(tenderID), clientID.(int64))
+	userID := ctx.GetInt64("userID")
+	err = h.TenderService.DeleteTender(int64(tenderID), userID)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return

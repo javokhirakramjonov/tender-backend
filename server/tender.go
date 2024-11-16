@@ -4,6 +4,7 @@ import (
 	"errors"
 	"tender-backend/model"
 	request_model "tender-backend/model/request"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -28,12 +29,30 @@ func (t *TenderService) CreateTender(req *request_model.CreateTenderReq) (*model
 		Budget:      req.Budget,
 	}
 
+	if err := validateCreateTender(req); err != nil {
+		return nil, err
+	}
+
 	// Save the tender to the database.
 	if err := t.db.Create(tender).Error; err != nil {
 		return nil, err
 	}
 
+
+
 	return tender, nil
+}
+
+func validateCreateTender(req *request_model.CreateTenderReq) error {
+	if req.Deadline.Before(time.Now()) {
+		return errors.New("deadline must be a future date and time")
+	}
+
+	if req.Budget <= 0 {
+		return errors.New("budget must be greater than zero")
+	}
+
+	return nil
 }
 
 // GetTenderById retrieves a tender by its ID.
@@ -75,24 +94,11 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 		return nil, err
 	}
 
-	// Update the fields with the new data.
-	if req.Title != "" {
-		tender.Title = req.Title
-	}
-	if req.Description != "" {
-		tender.Description = req.Description
-	}
-	if !req.Deadline.IsZero() { // Check if the deadline is set (not the zero value of time.Time).
-		tender.Deadline = req.Deadline
-	}
-	if req.Budget > 0 {
-		tender.Budget = req.Budget
-	}
-	if req.Status != "" {
-		tender.Status = req.Status
-	}
-
-	// Save the updated tender to the database.
+	tender.Title = req.Title
+	tender.Description = req.Description
+	tender.Deadline = req.Deadline
+	tender.Budget = req.Budget
+	tender.Status = req.Status
 	if err := t.db.Save(&tender).Error; err != nil {
 		return nil, err
 	}

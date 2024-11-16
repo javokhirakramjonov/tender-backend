@@ -34,8 +34,3 @@ type UpdateTenderReq struct {
 	Status      string `json:"status"`
 }
 
-type ValidateTenderBelongsToUserReq struct {
-	ClientID string `json:"client_id"`
-
-}
-
