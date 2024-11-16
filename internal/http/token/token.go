@@ -30,9 +30,9 @@ func GenerateJWTToken(userID int64, role string) *Tokens {
 	}
 }
 
-func ExtractClaim(secretKey string, tokenStr string) (jwt.MapClaims, error) {
+func ExtractClaim(tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
+		return []byte(config.GlobalConfig.SecretKey), nil
 	})
 	if err != nil {
 		return nil, errors.New("parsing token:" + err.Error())
@@ -43,7 +43,7 @@ func ExtractClaim(secretKey string, tokenStr string) (jwt.MapClaims, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, errors.New("invalid token claims")
+		return nil, errors.New("invalid token")
 	}
 
 	return claims, nil

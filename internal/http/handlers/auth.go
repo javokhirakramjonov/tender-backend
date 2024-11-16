@@ -2,17 +2,18 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"tender-backend/config"
 	"tender-backend/internal/http/token"
-	"tender-backend/model/request"
+	request_model "tender-backend/model/request"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Register godoc
 // @Summary Register a new user
 // @Description Register a new user with email, username, and password
-// @Tags 01-Authentication
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param user body request_model.CreateUserReq true "User registration request"
@@ -56,7 +57,7 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 // Login godoc
 // @Summary Login a user
 // @Description Authenticate user with email and password
-// @Tags 01-Authentication
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param credentials body request_model.LoginUserReq true "User login credentials"

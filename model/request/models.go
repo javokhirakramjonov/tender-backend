@@ -19,6 +19,12 @@ type UpdateUserReq struct {
 	Email    string `json:"email"`
 }
 
+type CreateBidReq struct {
+	Price        float64 `json:"price"`
+	DeliveryTime int     `json:"delivery_time"`
+	Comments     string  `json:"comments"`
+}
+
 type CreateTenderReq struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
@@ -33,4 +39,3 @@ type UpdateTenderReq struct {
 	Budget      float64 `json:"budget"`
 	Status      string `json:"status"`
 }
-
