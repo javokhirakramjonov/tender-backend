@@ -49,10 +49,10 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 		return
 	}
 
-	tokens := token.GenerateJWTToken(config.GlobalConfig, int64(user.ID))
+	token := token.GenerateJWTToken(config.GlobalConfig, int64(user.ID))
 
 	fmt.Println("New account registered to the system: ", req.Email)
-	c.JSON(http.StatusCreated, tokens)
+	c.JSON(http.StatusCreated, token)
 }
 
 // Login godoc
