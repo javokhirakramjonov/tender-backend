@@ -26,13 +26,13 @@ type Tender struct {
 
 // Bid represents the bids table.
 type Bid struct {
-	ID           int64     `gorm:"primaryKey;autoIncrement" json:"id"`
-	TenderID     int64     `gorm:"not null" json:"tender_id"`
-	ContractorID int64     `gorm:"not null" json:"contractor_id"`
-	Price        float64   `gorm:"not null" json:"price"`
-	DeliveryTime time.Time `gorm:"not null" json:"delivery_time"`
-	Comments     string    `gorm:"type:text" json:"comments"`
-	Status       string    `gorm:"size:50;not null;check:status IN ('accepted', 'rejected', 'pending')" json:"status"` // Restrict status to predefined values
+	ID           int64   `gorm:"primaryKey;autoIncrement" json:"id"`
+	TenderID     int64   `gorm:"not null" json:"tender_id"`
+	ContractorID int64   `gorm:"not null" json:"contractor_id"`
+	Price        float64 `gorm:"not null" json:"price"`
+	DeliveryTime int     `gorm:"not null" json:"delivery_time"`
+	Comments     string  `gorm:"type:text" json:"comments"`
+	Status       string  `gorm:"size:50;not null;check:status IN ('accepted', 'rejected', 'pending')" json:"status"` // Restrict status to predefined values
 }
 
 // Notification represents the notifications table.
