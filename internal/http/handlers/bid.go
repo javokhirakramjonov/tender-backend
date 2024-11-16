@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"tender-backend/internal/http/token"
 	request_model "tender-backend/model/request"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param bid body request_model.CreateBidReq true "Bid creation request"
-// @Success 201 {object} string "Bid created successfully"
+// @Success 201 {object} model.Bid "Bid created successfully"
 // @Failure 400 {object} string "Invalid request payload"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Server error"
@@ -24,19 +25,38 @@ import (
 // @Router /tenders/{tender_id}/bids [POST]
 func (h *HTTPHandler) CreateBid(c *gin.Context) {
 	var req request_model.CreateBidReq
+	tenderIdStr := c.Param("tender_id")
+	tenderId, err := strconv.Atoi(tenderIdStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tender ID"})
+		return
+	}
+
+	authHeader := c.GetHeader("Authorization")
+	claims, err := token.ExtractClaim(authHeader)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
+		return
+	}
+
+	contractorIdStr := claims["user_id"].(string)
+	contractorId, err := strconv.Atoi(contractorIdStr)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid contractor ID"})
+		return
+	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
 	if _, err := time.Parse(time.RFC3339, req.DeliveryTime.Format(time.RFC3339)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid delivery time format. Use ISO 8601 format, e.g., 2024-11-16T15:00:00Z.",
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid delivery time format. Use ISO 8601 format, e.g., 2024-11-16T15:00:00Z."})
 		return
 	}
 
-	createdBid, err := h.BidService.CreateBid(&req)
+	createdBid, err := h.BidService.CreateBid(&req, int64(tenderId), int64(contractorId))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bid"})
 		return
@@ -66,7 +86,7 @@ func (h *HTTPHandler) GetBid(c *gin.Context) {
 		return
 	}
 
-	bid, err := h.BidService.GetBidByID(uint(id))
+	bid, err := h.BidService.GetBidByID(int64(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bid"})
 		return
@@ -86,7 +106,7 @@ func (h *HTTPHandler) GetBid(c *gin.Context) {
 // @Tags Bid
 // @Accept json
 // @Produce json
-// @Success 200 {object} request_model.GetAllBidsRes "All bids retrieved successfully"
+// @Success 200 {object} []model.Bid "All bids retrieved successfully"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth

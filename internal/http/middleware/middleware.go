@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"tender-backend/config"
 	"tender-backend/internal/http/token"
 
 	"github.com/gin-gonic/gin"
@@ -17,11 +16,9 @@ func JWTMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		accessToken := authHeader
-
-		claims, err := token.ExtractClaim(config.GlobalConfig.SecretKey, accessToken)
+		claims, err := token.ExtractClaim(authHeader)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims", "details": err.Error()})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
 			c.Abort()
 			return
 		}

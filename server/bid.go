@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"tender-backend/model"
 	request_model "tender-backend/model/request"
 
@@ -16,10 +17,22 @@ func NewBidService(db *gorm.DB) *BidService {
 	return &BidService{db: db}
 }
 
-func (s *BidService) CreateBid(req *request_model.CreateBidReq) (*model.Bid, error) {
+func (s *BidService) CreateBid(req *request_model.CreateBidReq, tenderID int64, contractorID int64) (*model.Bid, error) {
+	var tender model.Tender
+	if err := s.db.First(&tender, "id = ?", tenderID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("tender with ID %d not found", tenderID)
+		}
+		return nil, err
+	}
+
+	if tender.Status != "open" {
+		return nil, fmt.Errorf("cannot place a bid on a tender that is not open")
+	}
+
 	newBid := model.Bid{
-		TenderID:     req.TenderID,
-		ContractorID: req.ContractorID,
+		TenderID:     tenderID,
+		ContractorID: contractorID,
 		Price:        req.Price,
 		DeliveryTime: req.DeliveryTime,
 		Comments:     req.Comments,
@@ -33,7 +46,7 @@ func (s *BidService) CreateBid(req *request_model.CreateBidReq) (*model.Bid, err
 	return &newBid, nil
 }
 
-func (s *BidService) GetBidByID(id uint) (*model.Bid, error) {
+func (s *BidService) GetBidByID(id int64) (*model.Bid, error) {
 	var bid model.Bid
 	if err := s.db.First(&bid, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
