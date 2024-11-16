@@ -20,7 +20,7 @@ type DBConfig struct {
 type Config struct {
 	DB        DBConfig
 	SecretKey string
-	GRPCUrl   string
+	AppPort   string
 }
 
 var GlobalConfig *Config
@@ -42,5 +42,6 @@ func LoadConfig() {
 			SSLMode:    os.Getenv("DB_SSL_MODE"),
 			TimeZone:   os.Getenv("DB_TIMEZONE"),
 		},
+		AppPort: os.Getenv("APP_PORT"),
 	}
 }

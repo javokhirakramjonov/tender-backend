@@ -10,7 +10,7 @@ type HTTPHandler struct {
 	UserService *server.UserService
 }
 
-func NewHandler(db *gorm.DB) *HTTPHandler {
+func NewHttpHandler(db *gorm.DB) *HTTPHandler {
 	return &HTTPHandler{
 		UserService: server.NewUserService(db),
 	}

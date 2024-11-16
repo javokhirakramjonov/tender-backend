@@ -1,12 +1,12 @@
 package api
 
 import (
-	"tender-backend/config"
-	token "tender-backend/internal/http/middleware"
-
 	"github.com/gin-gonic/gin"
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "tender-backend/docs"
+	"tender-backend/internal/http/handlers"
+	token "tender-backend/internal/http/middleware"
 )
 
 // NewGinRouter godoc
@@ -16,41 +16,42 @@ import (
 // @SecurityDefinitions.apikey BearerAuth
 // @In header
 // @Name Authorization
-func NewGinRouter(cfg *config.Config) *gin.Engine {
+func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	router := gin.Default()
+
 	swaggerUrl := ginSwagger.URL("swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler, swaggerUrl))
 
-	defHandler := func(c *gin.Context){}
+	defHandler := func(c *gin.Context) {}
 
 	// Auth routes
-	router.POST("/login", defHandler) 
-	router.POST("/register", defHandler)
+	router.POST("/login", h.Login)
+	router.POST("/register", h.Register)
 
 	// User routes
-	userGroup := router.Group("/users").Use(token.JWTMiddleware(cfg))
+	userGroup := router.Group("/users").Use(token.JWTMiddleware())
 	userGroup.GET("", defHandler)
 	userGroup.PUT("/:id", defHandler)
 	userGroup.DELETE("/:id", defHandler)
 
 	// Tenders routes
-	tendergroup := router.Group("/tenders")
-	tendergroup.Use(token.JWTMiddleware(cfg))
+	tenderGroup := router.Group("/tenders")
+	tenderGroup.Use(token.JWTMiddleware())
 
-	tendergroup.POST("", defHandler)
-	tendergroup.GET("/:id", defHandler)
-	tendergroup.GET("", defHandler)
-	tendergroup.PUT("/:id", defHandler)
-	tendergroup.DELETE("/:id", defHandler)
+	tenderGroup.POST("", defHandler)
+	tenderGroup.GET("/:id", defHandler)
+	tenderGroup.GET("", defHandler)
+	tenderGroup.PUT("/:id", defHandler)
+	tenderGroup.DELETE("/:id", defHandler)
 
 	// Bids routes
-	bidGroup := tendergroup.Group("/:id/bids")
+	bidGroup := tenderGroup.Group("/:id/bids")
 	bidGroup.POST("", defHandler)
 	bidGroup.GET("", defHandler)
 	bidGroup.GET("/:id", defHandler)
 
 	// Awards routes
-	awardGroup := tendergroup.Group("/:id/awards")
+	awardGroup := tenderGroup.Group("/:id/awards")
 	awardGroup.POST("", defHandler)
 
 	return router
