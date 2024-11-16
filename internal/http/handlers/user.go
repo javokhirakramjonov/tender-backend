@@ -16,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Success 200 {object} model.User "User retrieved successfully"
+// @Success 200 {object} response_model.ProfileRes "User retrieved successfully"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 404 {object} string "User not found"
 // @Failure 500 {object} string "Server error"

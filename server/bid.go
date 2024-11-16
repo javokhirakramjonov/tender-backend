@@ -72,7 +72,11 @@ func (s *BidService) GetAllBids() ([]model.Bid, error) {
 }
 
 func (s *BidService) validateCreateBidRequest(req *request_model.CreateBidReq) error {
-	if req.Price <= 0 {
+	if req.DeliveryTime < 0 {
+		return errors.New("delivery time must be greater than zero")
+	}
+
+	if req.Price < 0 {
 		return errors.New("price must be greater than zero")
 	}
 
