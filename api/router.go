@@ -61,7 +61,7 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	bidGroup.GET("", h.GetBids)
 
 	// Awards routes
-	awardGroup := tenderGroup.Group("/:id/awards")
+	awardGroup := tenderGroup.Group("/:tender_id/awards")
 	awardGroup.POST("", defHandler)
 
 	return router
