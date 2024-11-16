@@ -1,10 +1,13 @@
 package notification
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"sync"
+	"tender-backend/db"
+	"tender-backend/server"
 )
 
 var upgrader = websocket.Upgrader{
@@ -14,84 +17,57 @@ var upgrader = websocket.Upgrader{
 }
 
 type Client struct {
-	Conn *websocket.Conn
-	Send chan []byte
+	UserID int64
+	Conn   *websocket.Conn
+	Send   chan []byte
 }
 
 type Server struct {
-	Clients    map[*Client]bool
-	Register   chan *Client
-	Unregister chan *Client
-	Broadcast  chan []byte
-	mu         sync.Mutex
+	Clients   map[*Client]bool
+	Register  chan *Client
+	Broadcast chan []byte
+	mu        sync.Mutex
+	ns        *server.NotificationService
 }
 
 func NewNotificationServer() *Server {
 	return &Server{
-		Clients:    make(map[*Client]bool),
-		Register:   make(chan *Client),
-		Unregister: make(chan *Client),
-		Broadcast:  make(chan []byte),
+		Clients:  make(map[*Client]bool),
+		Register: make(chan *Client),
+		ns:       server.NewNotificationService(db.DB),
 	}
 }
 
 func (s *Server) Run() {
-	for {
-		select {
-		case client := <-s.Register:
-			s.mu.Lock()
-			s.Clients[client] = true
-			s.mu.Unlock()
-			log.Println("Client registered")
+	for client := range s.Register {
+		s.mu.Lock()
+		s.Clients[client] = true
+		s.mu.Unlock()
+		log.Println("Client registered")
+		go func() {
+			err := s.ns.PublishNotDeliveredNotificationsForUser(client.UserID)
 
-		case client := <-s.Unregister:
-			s.mu.Lock()
-			if _, ok := s.Clients[client]; ok {
-				delete(s.Clients, client)
-				close(client.Send)
-				log.Println("Client unregistered")
+			if err != nil {
+				log.Printf("Failed to publish notifications for user: %v", err)
 			}
-			s.mu.Unlock()
-
-		case message := <-s.Broadcast:
-			s.mu.Lock()
-			for client := range s.Clients {
-				select {
-				case client.Send <- message:
-				default:
-					close(client.Send)
-					delete(s.Clients, client)
-				}
-			}
-			s.mu.Unlock()
-		}
+		}()
 	}
 }
 
-func (s *Server) HandleConnection(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
+func (s *Server) HandleConnection(c *gin.Context) {
+	// Upgrade the HTTP connection to a WebSocket
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Printf("Failed to upgrade connection: %v", err)
 		return
 	}
 
+	userId := c.GetInt64("user_id")
+
 	client := &Client{
-		Conn: conn,
-		Send: make(chan []byte),
+		Conn:   conn,
+		Send:   make(chan []byte),
+		UserID: userId,
 	}
 	s.Register <- client
-
-	// Start a goroutine to write messages to the client
-	go s.writePump(client)
-}
-
-func (s *Server) writePump(client *Client) {
-	defer func() {
-		client.Conn.Close()
-	}()
-	for message := range client.Send {
-		if err := client.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
-			break
-		}
-	}
 }
