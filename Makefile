@@ -8,6 +8,9 @@ run-db:
 run:
 	docker-compose up -d app
 
+local-run:
+	go run ./cmd/main.go
+
 # Command to stop all services
 stop:
 	docker-compose down

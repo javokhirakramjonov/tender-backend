@@ -48,15 +48,22 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	tenderGroup := router.Group("/tenders")
 
 	// Unprotected GET routes for tenders
-	tenderGroup.GET("/:tender_id", defHandler) // View a specific tender
-	tenderGroup.GET("", defHandler)            // List all tenders
+	tenderGroup.GET("/:tender_id", h.GetTender) // View a specific tender
+	tenderGroup.GET("", h.GetTenders)            // List all tenders
 
 	// Protected POST, PUT, DELETE routes for tenders
 	protectedTenderGroup := tenderGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
-	protectedTenderGroup.POST("", defHandler)
-	protectedTenderGroup.PUT("/:tender_id", defHandler)
-	protectedTenderGroup.DELETE("/:tender_id", defHandler)
+	protectedTenderGroup.POST("", h.CreateTender)
+	protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
+	protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
 
+	/*
+	tenderGroup.POST("", h.CreateTender)
+	tenderGroup.GET("/:id", h.GetTender)
+	tenderGroup.GET("", h.GetTenders)
+	tenderGroup.PUT("/:id", h.UpdateTender)
+	tenderGroup.DELETE("/:id", h.DeleteTender)
+	*/
 	// Bids routes
 	bidGroup := router.Group("/tenders/:tender_id/bids")
 

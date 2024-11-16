@@ -27,6 +27,7 @@ func (t *TenderService) CreateTender(req *request_model.CreateTenderReq) (*model
 		Description: req.Description,
 		Deadline:    req.Deadline, // Use the time.Time value directly.
 		Budget:      req.Budget,
+		Status:      "open",
 	}
 
 	if err := validateCreateTender(req); err != nil {

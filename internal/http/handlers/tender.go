@@ -11,7 +11,7 @@ import (
 // @Security BearerAuth
 // @Summary Create a new tender
 // @Description Create a new tender
-// @Tags tender
+// @Tags Tender
 // @Accept json
 // @Produce json
 // @Param tender body request_model.CreateTenderReq true "Tender information"
