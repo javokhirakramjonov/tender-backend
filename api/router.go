@@ -9,7 +9,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// NewGinRouter creates a new gin router with the specified NewGinRouter
+// NewGinRouter godocs
 // @Title Tender API Gateway
 // @Version 1.0
 // @Description This is the API Gateway for the Tender project.
@@ -29,7 +29,7 @@ func NewGinRouter(cfg *config.Config) *gin.Engine {
 
 	// User routes
 	userGroup := router.Group("/users").Use(token.JWTMiddleware(cfg))
-	userGroup.GET("/:id", defHandler)
+	userGroup.GET("", defHandler)
 	userGroup.PUT("/:id", defHandler)
 	userGroup.DELETE("/:id", defHandler)
 
