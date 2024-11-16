@@ -13,10 +13,11 @@ type Tokens struct {
 	AccessToken string `json:"access_token"`
 }
 
-func GenerateJWTToken(userID int64) *Tokens {
+func GenerateJWTToken(userID int64, role string) *Tokens {
 	accessToken := jwt.New(jwt.SigningMethodHS256)
 	claims := accessToken.Claims.(jwt.MapClaims)
 	claims["user_id"] = userID
+	claims["role"] = role
 	claims["iat"] = time.Now().Unix()
 	claims["exp"] = time.Now().Add(24 * time.Hour).Unix() // Token expires in 24 hours
 	access, err := accessToken.SignedString([]byte(config.GlobalConfig.SecretKey))
