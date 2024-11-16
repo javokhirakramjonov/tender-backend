@@ -98,7 +98,7 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 		return
 	}
 
-	userID  := ctx.GetInt64("user_id")
+	clientID  := ctx.GetInt64("user_id")
 
 	// Bind the request JSON to the UpdateTenderReq struct
 	req := request_model.UpdateTenderReq{}
@@ -108,7 +108,7 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 	}
 
 	// Call the service method
-	res, err := h.TenderService.UpdateTender(int64(tenderID), userID, &req)
+	res, err := h.TenderService.UpdateTender(int64(tenderID), clientID, &req)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return
@@ -135,8 +135,8 @@ func (h *HTTPHandler) DeleteTender(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt64("user_id")
-	err = h.TenderService.DeleteTender(int64(tenderID), userID)
+	clientID := ctx.GetInt64("user_id")
+	err = h.TenderService.DeleteTender(int64(tenderID), clientID)
 	if err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return

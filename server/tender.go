@@ -93,19 +93,16 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 		return nil, err
 	}
 
-	// Validate the update with the new validation function
-	if err := ValidateTenderUpdate(tender.Status, req.Status); err != nil {
+	if err := ValidateTenderUpdate(tender.Status, req.Status, req.Deadline, req.Budget); err != nil {
 		return nil, err
 	}
 
-	// Update the tender fields
 	tender.Title = req.Title
 	tender.Description = req.Description
 	tender.Deadline = req.Deadline
 	tender.Budget = req.Budget
 	tender.Status = req.Status
 
-	// Save the updated tender to the database
 	if err := t.db.Save(&tender).Error; err != nil {
 		return nil, err
 	}
@@ -113,18 +110,31 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 	return &tender, nil
 }
 
-func ValidateTenderUpdate(existingStatus, newStatus string) error {
-	if existingStatus == "closed" || existingStatus == "awarded" {
-		return errors.New("updates are not allowed for tenders with 'closed' or 'awarded' status")
+
+func ValidateTenderUpdate(existingStatus, newStatus string, deadline time.Time, budget float64) error {
+	// Reject updates if the existing status is not "open"
+	if existingStatus != "open" {
+		return errors.New("updates are only allowed for tenders with 'open' status")
 	}
 
-	// Allow status transitions only from "open" to "closed"
-	if existingStatus == "open" && newStatus != "open" && newStatus != "closed" {
-		return errors.New("status can only be changed from 'open' to 'closed'")
+	// Reject updates if the new status is "awarded"
+	if newStatus == "awarded" {
+		return errors.New("status cannot be updated to 'awarded'")
+	}
+
+	// Ensure the deadline is a future date
+	if !deadline.After(time.Now()) {
+		return errors.New("deadline must be a future date and time")
+	}
+
+	// Ensure the budget is greater than 0
+	if budget <= 0 {
+		return errors.New("budget must be greater than zero")
 	}
 
 	return nil
 }
+
 
 
 
