@@ -81,7 +81,7 @@ func (t *TenderService) GetTenders() ([]model.Tender, error) {
 }
 
 func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_model.UpdateTenderReq) (*model.Tender, error) {
-	// Validate that the tender belongs to the user.
+	// Validate that the tender belongs to the user
 	if err := t.ValidateTenderBelongsToUser(tenderID, clientID); err != nil {
 		return nil, err
 	}
@@ -94,17 +94,29 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 		return nil, err
 	}
 
+	if tender.Status == "closed" || tender.Status == "awarded" {
+		return nil, errors.New("updates are not allowed for tenders with 'closed' or 'awarded' status")
+	}
+
+	if tender.Status == "open" && req.Status != "open" && req.Status != "closed" {
+		return nil, errors.New("status can only be changed from 'open' to 'closed'")
+	}
+
+	// Update the tender fields
 	tender.Title = req.Title
 	tender.Description = req.Description
 	tender.Deadline = req.Deadline
 	tender.Budget = req.Budget
 	tender.Status = req.Status
+
+	// Save the updated tender to the database
 	if err := t.db.Save(&tender).Error; err != nil {
 		return nil, err
 	}
 
 	return &tender, nil
 }
+
 
 // DeleteTender deletes a tender by its ID.
 func (t *TenderService) DeleteTender(tenderID, clientID int64) error {
