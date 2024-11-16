@@ -39,7 +39,7 @@ func (h *HTTPHandler) CreateTender(ctx *gin.Context) {
 // @Security BearerAuth
 // @Summary Get a tender by ID
 // @Description Get a tender by ID
-// @Tags tender
+// @Tags Tender
 // @Produce json
 // @Param tender_id path int true "Tender ID"
 // @Success 200 {object} model.Tender
@@ -64,7 +64,7 @@ func (h *HTTPHandler) GetTender(ctx *gin.Context) {
 // @Security BearerAuth
 // @Summary Get all tenders
 // @Description Get all tenders
-// @Tags tender
+// @Tags Tender
 // @Produce json
 // @Success 200 {object} []model.Tender
 // @Router /tenders [get]
@@ -83,7 +83,7 @@ func (h *HTTPHandler) GetTenders(ctx *gin.Context) {
 // @Security BearerAuth
 // @Summary Update a tender by ID
 // @Description Update a tender by ID
-// @Tags tender
+// @Tags Tender
 // @Accept json
 // @Produce json
 // @Param tender_id path int true "Tender ID"
@@ -123,7 +123,7 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 // @Security BearerAuth
 // @Summary Delete a tender by ID
 // @Description Delete a tender by ID
-// @Tags tender
+// @Tags Tender
 // @Param tender_id path int true "Tender ID"
 // @Success 204
 // @Router /tenders/{tender_id} [delete]
