@@ -1,9 +1,10 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type DBConfig struct {
@@ -17,8 +18,9 @@ type DBConfig struct {
 }
 
 type Config struct {
-	DB      DBConfig
-	GRPCUrl string
+	DB        DBConfig
+	SecretKey string
+	GRPCUrl   string
 }
 
 func LoadConfig() *Config {
@@ -28,6 +30,7 @@ func LoadConfig() *Config {
 	}
 
 	return &Config{
+		SecretKey: os.Getenv("JWT_SECRET_KEY"),
 		DB: DBConfig{
 			DBHost:     os.Getenv("DB_HOST"),
 			DBPort:     os.Getenv("DB_PORT"),
