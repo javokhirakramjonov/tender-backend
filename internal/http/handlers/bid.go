@@ -30,21 +30,16 @@ func (h *HTTPHandler) CreateBid(c *gin.Context) {
 		return
 	}
 
-	contractorId := int64(c.GetInt("user_id"))
+	contractorId := c.GetInt64("user_id")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	if req.DeliveryTime <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid delivery time"})
-		return
-	}
-
 	createdBid, err := h.BidService.CreateBid(&req, int64(tenderId), contractorId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bid"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bid", "details": err.Error()})
 		return
 	}
 
@@ -75,11 +70,6 @@ func (h *HTTPHandler) GetBid(c *gin.Context) {
 	bid, err := h.BidService.GetBidByID(int64(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bid"})
-		return
-	}
-
-	if bid == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Bid not found"})
 		return
 	}
 

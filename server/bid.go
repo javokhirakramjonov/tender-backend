@@ -18,6 +18,10 @@ func NewBidService(db *gorm.DB) *BidService {
 }
 
 func (s *BidService) CreateBid(req *request_model.CreateBidReq, tenderID int64, contractorID int64) (*model.Bid, error) {
+	if req.DeliveryTime <= 0 {
+		return nil, errors.New("delivery time must be greater than 0")
+	}
+
 	var tender model.Tender
 	if err := s.db.First(&tender, "id = ?", tenderID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -52,7 +56,7 @@ func (s *BidService) GetBidByID(id int64) (*model.Bid, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("bid not found")
 		}
-		return nil, nil
+		return nil, fmt.Errorf("failed to retrieve bid:" + err.Error())
 	}
 
 	return &bid, nil

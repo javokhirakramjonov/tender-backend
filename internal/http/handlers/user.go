@@ -2,11 +2,35 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 	request_model "tender-backend/model/request"
 
 	"github.com/gin-gonic/gin"
 )
+
+// GetUserByID godoc
+// @Summary Get user by ID
+// @Description Retrieves a user by their ID.
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} model.User "User retrieved successfully"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 404 {object} string "User not found"
+// @Failure 500 {object} string "Server error"
+// @Security BearerAuth
+// @Router /users [GET]
+func (h *HTTPHandler) GetUserByID(c *gin.Context) {
+	id := c.GetInt64("user_id")
+
+	user, err := h.UserService.GetUserByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user", "details": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
 
 // UpdateUser godoc
 // @Summary Update user by ID
@@ -22,14 +46,9 @@ import (
 // @Failure 404 {object} string "User not found"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
-// @Router /users/{id} [PUT]
+// @Router /users [PUT]
 func (h *HTTPHandler) UpdateUser(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
+	id := c.GetInt64("user_id")
 
 	var req request_model.UpdateUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -37,7 +56,7 @@ func (h *HTTPHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	updatedUser, err := h.UserService.UpdateUser(&req, int64(id))
+	updatedUser, err := h.UserService.UpdateUser(&req, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
@@ -59,16 +78,11 @@ func (h *HTTPHandler) UpdateUser(c *gin.Context) {
 // @Failure 404 {object} string "User not found"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
-// @Router /users/{id} [DELETE]
+// @Router /users [DELETE]
 func (h *HTTPHandler) DeleteUser(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
+	id := c.GetInt64("user_id")
 
-	err = h.UserService.DeleteUser(int64(id))
+	err := h.UserService.DeleteUser(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
