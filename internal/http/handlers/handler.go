@@ -8,10 +8,12 @@ import (
 
 type HTTPHandler struct {
 	UserService *server.UserService
+	BidService  *server.BidService
 }
 
 func NewHttpHandler(db *gorm.DB) *HTTPHandler {
 	return &HTTPHandler{
 		UserService: server.NewUserService(db),
+		BidService:  server.NewBidService(db),
 	}
 }
