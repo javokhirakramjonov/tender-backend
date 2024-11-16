@@ -16,3 +16,20 @@ type UpdateUserReq struct {
 	FullName string `json:"full_name"`
 	Email    string `json:"email"`
 }
+
+type CreateTenderRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Deadline    string `json:"deadline"`
+	Budget      float64 `json:"budget"`
+	Status      string `json:"status"`
+}
+
+type UpdateTenderRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Deadline    string `json:"deadline"`
+	Budget      float64 `json:"budget"`
+	Status      string `json:"status"`
+}
+
