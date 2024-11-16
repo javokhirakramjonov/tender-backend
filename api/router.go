@@ -9,7 +9,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// NewGinRouter godocs
+// NewGinRouter godoc
 // @Title Tender API Gateway
 // @Version 1.0
 // @Description This is the API Gateway for the Tender project.
@@ -52,7 +52,6 @@ func NewGinRouter(cfg *config.Config) *gin.Engine {
 	// Awards routes
 	awardGroup := tendergroup.Group("/:id/awards")
 	awardGroup.POST("", defHandler)
-
 
 	return router
 }
