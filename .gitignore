@@ -21,8 +21,14 @@
 go.work
 go.work.sum
 
+# generated go sum file
+go.sum
+
+# generated swagger docs folder
+docs/ 
 # env file
 .env
 
 # .idea directory
 .idea
+

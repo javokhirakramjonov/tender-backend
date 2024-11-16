@@ -1,12 +1,13 @@
 package api
 
 import (
+	_ "tender-backend/docs"
+	"tender-backend/internal/http/handlers"
+	"tender-backend/internal/http/middleware"
+
 	"github.com/gin-gonic/gin"
 	files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "tender-backend/docs"
-	"tender-backend/internal/http/handlers"
-	token "tender-backend/internal/http/middleware"
 )
 
 // NewGinRouter godoc
@@ -29,14 +30,14 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	router.POST("/register", h.Register)
 
 	// User routes
-	userGroup := router.Group("/users").Use(token.JWTMiddleware())
+	userGroup := router.Group("/users").Use(middleware.JWTMiddleware())
 	userGroup.GET("", defHandler)
 	userGroup.PUT("/:id", defHandler)
 	userGroup.DELETE("/:id", defHandler)
 
 	// Tenders routes
 	tenderGroup := router.Group("/tenders")
-	tenderGroup.Use(token.JWTMiddleware())
+	tenderGroup.Use(middleware.JWTMiddleware())
 
 	tenderGroup.POST("", defHandler)
 	tenderGroup.GET("/:id", defHandler)
