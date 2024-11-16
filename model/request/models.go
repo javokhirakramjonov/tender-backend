@@ -39,3 +39,8 @@ type UpdateTenderReq struct {
 	Budget      float64 `json:"budget"`
 	Status      string `json:"status"`
 }
+
+type CreateNotificationReq struct {
+	UserID  int64  `json:"user_id"`
+	Message string `json:"message"`
+}
