@@ -2,13 +2,14 @@ package db
 
 import (
 	"fmt"
+	"log"
+	"tender-backend/config"
+	"tender-backend/model"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
-	"tender-backend/config"
-	"tender-backend/model"
 )
 
 var DB *gorm.DB
