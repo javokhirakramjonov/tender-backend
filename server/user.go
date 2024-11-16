@@ -45,7 +45,7 @@ func (s *UserService) GetUserByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
-func (s *UserService) GetUserByID(id uint) (*model.User, error) {
+func (s *UserService) GetUserByID(id int64) (*model.User, error) {
 	var user model.User
 	if err := s.db.First(&user, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -56,8 +56,8 @@ func (s *UserService) GetUserByID(id uint) (*model.User, error) {
 
 	return &user, nil
 }
- 
-func (s *UserService) UpdateUser(user *request_model.UpdateUserReq, id uint) (*model.User, error) {
+
+func (s *UserService) UpdateUser(user *request_model.UpdateUserReq, id int64) (*model.User, error) {
 	var existingUser model.User
 	if err := s.db.First(&existingUser, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -76,7 +76,7 @@ func (s *UserService) UpdateUser(user *request_model.UpdateUserReq, id uint) (*m
 	return &existingUser, nil
 }
 
-func (s *UserService) DeleteUser(id uint) error {
+func (s *UserService) DeleteUser(id int64) error {
 	if err := s.db.Delete(&model.User{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return errors.New("user not found")
