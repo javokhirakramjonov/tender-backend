@@ -38,30 +38,37 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	router.POST("/login", h.Login)
 	router.POST("/register", h.Register)
 
-	// User routes
+	// User routes (protected)
 	userGroup := router.Group("/users").Use(middleware.JWTMiddleware())
-	userGroup.GET("", defHandler)
-	userGroup.PUT("/:id", defHandler)
-	userGroup.DELETE("/:id", defHandler)
+	userGroup.PUT("/:id", h.UpdateUser)
+	userGroup.DELETE("/:id", h.DeleteUser)
 
 	// Tenders routes
 	tenderGroup := router.Group("/tenders")
-	tenderGroup.Use(middleware.JWTMiddleware())
 
-	tenderGroup.POST("", defHandler)
-	tenderGroup.GET("/:tender_id", defHandler)
-	tenderGroup.GET("", defHandler)
-	tenderGroup.PUT("/:tender_id", defHandler)
-	tenderGroup.DELETE("/:tender_id", defHandler)
+	// Unprotected GET routes for tenders
+	tenderGroup.GET("/:tender_id", defHandler) // View a specific tender
+	tenderGroup.GET("", defHandler)            // List all tenders
+
+	// Protected POST, PUT, DELETE routes for tenders
+	protectedTenderGroup := tenderGroup.Use(middleware.JWTMiddleware(), middleware.ContractorMiddleware())
+	protectedTenderGroup.POST("", defHandler)
+	protectedTenderGroup.PUT("/:tender_id", defHandler)
+	protectedTenderGroup.DELETE("/:tender_id", defHandler)
 
 	// Bids routes
-	bidGroup := tenderGroup.Group("/:tender_id/bids")
-	bidGroup.POST("", h.CreateBid)
-	bidGroup.GET("/:bid_id", h.GetBid)
-	bidGroup.GET("", h.GetBids)
+	bidGroup := router.Group("/tenders/:tender_id/bids")
+
+	// Unprotected GET routes for bids
+	bidGroup.GET("/:bid_id", h.GetBid) // View a specific bid
+	bidGroup.GET("", h.GetBids)        // List all bids for a tender
+
+	// Protected POST routes for bids
+	protectedBidGroup := bidGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
+	protectedBidGroup.POST("", h.CreateBid)
 
 	// Awards routes
-	awardGroup := tenderGroup.Group("/:tender_id/awards")
+	awardGroup := tenderGroup.Group("/:tender_id/awards").Use(middleware.JWTMiddleware())
 	awardGroup.POST("", defHandler)
 
 	return router

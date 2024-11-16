@@ -23,7 +23,33 @@ func JWTMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("claims", claims)
+		c.Set("user_id", claims["user_id"])
+		c.Set("role", claims["role"])
+
+		c.Next()
+	}
+}
+
+func ClientMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := c.GetString("role")
+		if role != "client" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Only clients can access this resource"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+func ContractorMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := c.GetString("role")
+		if role != "contractor" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Only contractors can access this resource"})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }

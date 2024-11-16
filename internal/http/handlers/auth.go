@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"tender-backend/config"
 	"tender-backend/internal/http/token"
-	"tender-backend/model/request"
+	request_model "tender-backend/model/request"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Register godoc

@@ -3,9 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
-	"tender-backend/internal/http/token"
 	request_model "tender-backend/model/request"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,31 +30,19 @@ func (h *HTTPHandler) CreateBid(c *gin.Context) {
 		return
 	}
 
-	authHeader := c.GetHeader("Authorization")
-	claims, err := token.ExtractClaim(authHeader)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
-		return
-	}
-
-	contractorIdStr := claims["user_id"].(string)
-	contractorId, err := strconv.Atoi(contractorIdStr)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid contractor ID"})
-		return
-	}
+	contractorId := int64(c.GetInt("user_id"))
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 		return
 	}
 
-	if _, err := time.Parse(time.RFC3339, req.DeliveryTime.Format(time.RFC3339)); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid delivery time format. Use ISO 8601 format, e.g., 2024-11-16T15:00:00Z."})
+	if req.DeliveryTime <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid delivery time"})
 		return
 	}
 
-	createdBid, err := h.BidService.CreateBid(&req, int64(tenderId), int64(contractorId))
+	createdBid, err := h.BidService.CreateBid(&req, int64(tenderId), contractorId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bid"})
 		return
