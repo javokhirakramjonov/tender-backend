@@ -17,9 +17,8 @@ func GenerateJWTToken(config *config.Config, userID string, email string) *Token
 	accessToken := jwt.New(jwt.SigningMethodHS256)
 	claims := accessToken.Claims.(jwt.MapClaims)
 	claims["user_id"] = userID
-	claims["email"] = email
 	claims["iat"] = time.Now().Unix()
-	claims["exp"] = time.Now().Add(24 * time.Hour).Unix() // Token expires in 3 minutes
+	claims["exp"] = time.Now().Add(24 * time.Hour).Unix() // Token expires in 24 hours
 	access, err := accessToken.SignedString([]byte(config.SecretKey))
 	if err != nil {
 		log.Fatal("error while generating access token : ", err)
@@ -28,14 +27,6 @@ func GenerateJWTToken(config *config.Config, userID string, email string) *Token
 	return &Tokens{
 		AccessToken: access,
 	}
-}
-
-func ValidateToken(secretKey string, tokenStr string) (bool, error) {
-	_, err := ExtractClaim(secretKey, tokenStr)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
 }
 
 func ExtractClaim(secretKey string, tokenStr string) (jwt.MapClaims, error) {

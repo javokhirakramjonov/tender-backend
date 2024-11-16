@@ -17,13 +17,6 @@ func JWTMiddleware(config *config.Config) gin.HandlerFunc {
 			return
 		}
 
-		valid, err := token.ValidateToken(config.SecretKey, authHeader)
-		if err != nil || !valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token", "details": err.Error()})
-			c.Abort()
-			return
-		}
-
 		accessToken := authHeader
 
 		claims, err := token.ExtractClaim(config.SecretKey, accessToken)
