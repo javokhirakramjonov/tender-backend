@@ -35,7 +35,7 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 	}
 
 	if !config.IsValidEmail(req.Email) {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid email"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid email format"})
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 	user, err := h.UserService.CreateUser(&req)
 	if err != nil {
 		fmt.Printf("Error creating user: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Server error", "err": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -87,15 +87,20 @@ func (h *HTTPHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := h.UserService.GetUserByEmail(req.Email)
+	if req.Username == "" || req.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Username and password are required"})
+		return
+	}
+
+	user, err := h.UserService.GetByUsername(req.Username)
 	if err != nil {
 		fmt.Printf("Error fetching user: %v", err)
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User registered with this email not found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
 	}
 
 	if !config.CheckPasswordHash(req.Password, user.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid username or password"})
 		return
 	}
 

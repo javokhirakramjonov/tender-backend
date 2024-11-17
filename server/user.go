@@ -24,6 +24,11 @@ func (s *UserService) CreateUser(user *request_model.CreateUserReq) (*model.User
 		Password: user.Password,
 		Email:    user.Email,
 		Role:     user.Role,
+		Username: user.Username,
+	}
+
+	if _, err := s.GetByUsername(user.Email); err == nil {
+		return nil, errors.New("Email already exists")
 	}
 
 	if err := s.db.Create(&newUser).Error; err != nil {
@@ -45,9 +50,9 @@ func (s *UserService) GetUserByID(id int64) (*model.User, error) {
 	return &user, nil
 }
 
-func (s *UserService) GetUserByEmail(email string) (*model.User, error) {
+func (s *UserService) GetByUsername(email string) (*model.User, error) {
 	var user model.User
-	if err := s.db.Where("email = ?", email).First(&user).Error; err != nil {
+	if err := s.db.Where("username = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("user not found")
 		}
