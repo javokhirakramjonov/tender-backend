@@ -151,7 +151,6 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 	return &tender, nil
 }
 
-// ValidateTenderUpdate validates the input for updating a tender.
 func ValidateTenderUpdate(existingStatus, newStatus string, deadline time.Time, budget float64) error {
 	// Reject updates if the existing status is not "open"
 	if existingStatus != "open" {
