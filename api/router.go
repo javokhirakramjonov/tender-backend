@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	_ "tender-backend/docs"
 	"tender-backend/internal/http/handlers"
 	"tender-backend/internal/http/middleware"
@@ -65,10 +64,6 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	bidGroup := router.Group("/tenders/:tender_id/bids")
 	{
 		bidSubmissionRateLimit := middleware.RateLimitMiddleware(
-			func(c *gin.Context) string {
-				userID := c.GetString("userID") // Assumes userID is set by JWTMiddleware
-				return fmt.Sprintf("bid-submissions-%s", userID)
-			},
 			2,           // Max 5 requests
 			time.Minute, // Per minute
 		)

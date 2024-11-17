@@ -14,23 +14,19 @@ type clientData struct {
 }
 
 var (
-	clientRateLimiters = make(map[string]*clientData)
+	clientRateLimiters = make(map[int64]*clientData)
 	rateLimiterMutex   sync.Mutex
 )
 
-func RateLimitMiddleware(keyFunc func(c *gin.Context) string, maxRequests int, window time.Duration) gin.HandlerFunc {
+func RateLimitMiddleware(maxRequests int, window time.Duration) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		key := keyFunc(c)
-		if key == "" {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Rate limiting key missing"})
-			return
-		}
+		userId := c.GetInt64("user_id")
 
 		rateLimiterMutex.Lock()
-		clientLimiter, exists := clientRateLimiters[key]
+		clientLimiter, exists := clientRateLimiters[userId]
 		if !exists {
 			clientLimiter = &clientData{timestamps: []time.Time{}}
-			clientRateLimiters[key] = clientLimiter
+			clientRateLimiters[userId] = clientLimiter
 		}
 		rateLimiterMutex.Unlock()
 
@@ -53,6 +49,10 @@ func RateLimitMiddleware(keyFunc func(c *gin.Context) string, maxRequests int, w
 		}
 
 		clientLimiter.timestamps = append(clientLimiter.timestamps, now)
+
+		rateLimiterMutex.Lock()
+		clientRateLimiters[userId] = clientLimiter
+		rateLimiterMutex.Unlock()
 
 		c.Next()
 	}
