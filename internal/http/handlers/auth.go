@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"gorm.io/gorm/utils"
 	"net/http"
 	"tender-backend/config"
 	"tender-backend/internal/http/token"
@@ -36,6 +37,13 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 
 	if !config.IsValidEmail(req.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid email format"})
+		return
+	}
+
+	availableRoles := []string{"client", "contractor"}
+
+	if !utils.Contains(availableRoles, req.Role) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid role"})
 		return
 	}
 

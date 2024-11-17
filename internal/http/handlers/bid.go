@@ -38,9 +38,9 @@ func (h *HTTPHandler) CreateBid(c *gin.Context) {
 		return
 	}
 
-	createdBid, err := h.BidService.CreateBid(&req, int64(tenderId), contractorId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create bid", "details": err.Error()})
+	createdBid, err2 := h.BidService.CreateBid(&req, int64(tenderId), contractorId)
+	if err2 != nil {
+		c.JSON(err2.StatusCode, gin.H{"message": err2.Error()})
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *HTTPHandler) GetBid(c *gin.Context) {
 	c.JSON(http.StatusOK, bid)
 }
 
-// GetAllBids godoc
+// GetBids godoc
 // @Summary Get all Bids
 // @Description Retrieves all Bids for the authenticated user.
 // @Tags Bid
@@ -104,11 +104,63 @@ func (h *HTTPHandler) GetBids(c *gin.Context) {
 		return
 	}
 
-	bids, err := h.BidService.GetAllBids(int64(tenderID))
+	bids, err2 := h.BidService.GetAllBids(int64(tenderID))
+	if err2 != nil {
+		c.JSON(err2.StatusCode, gin.H{"message": err2.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, bids)
+}
+
+// GetContractorBids godoc
+// @Summary Get all Bids for a Contractor
+// @Description Retrieves all Bids for the authenticated Contractor.
+// @Tags Bid
+// @Accept json
+// @Produce json
+// @Success 200 {object} []model.Bid "All bids retrieved successfully"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 500 {object} string "Server error"
+// @Security BearerAuth
+// @Router /api/contractor/bids [get]
+func (h *HTTPHandler) GetContractorBids(c *gin.Context) {
+	contractorID := c.GetInt64("user_id")
+	bids, err := h.BidService.GetContractorBids(contractorID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bids"})
 		return
 	}
 
 	c.JSON(http.StatusOK, bids)
+}
+
+// DeleteBid godoc
+// @Summary Delete a Bid
+// @Description Deletes a Bid by its ID.
+// @Tags Bid
+// @Accept json
+// @Produce json
+// @Param bid_id path string true "Bid ID"
+// @Success 200 {object} string "Bid deleted successfully"
+// @Failure 401 {object} string "Unauthorized"
+// @Failure 404 {object} string "Bid not found"
+// @Failure 500 {object} string "Server error"
+// @Security BearerAuth
+// @Router /bids/{bid_id} [DELETE]
+func (h *HTTPHandler) DeleteBid(c *gin.Context) {
+	bidIDStr := c.Param("bid_id")
+	bidID, err := strconv.Atoi(bidIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid bid ID"})
+		return
+	}
+
+	err2 := h.BidService.DeleteBid(int64(bidID), c.GetInt64("user_id"))
+	if err2 != nil {
+		c.JSON(err2.StatusCode, gin.H{"message": err2.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Bid deleted successfully"})
 }

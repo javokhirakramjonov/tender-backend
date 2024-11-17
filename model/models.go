@@ -16,13 +16,14 @@ type User struct {
 
 // Tender represents the tenders table.
 type Tender struct {
-	ID          int64     `gorm:"primaryKey;autoIncrement" json:"id"`
-	ClientID    int64     `gorm:"not null" json:"client_id"`
-	Title       string    `gorm:"size:255;not null" json:"title"`
-	Description string    `gorm:"type:text;not null" json:"description"`
-	Deadline    time.Time `gorm:"not null" json:"deadline"`
-	Budget      float64   `gorm:"not null" json:"budget"`
-	Status      string    `gorm:"size:50;not null;check:status IN ('open', 'closed', 'pending', 'awarded')" json:"status"` // Restrict status to predefined values
+	ID                  int64     `gorm:"primaryKey;autoIncrement" json:"id"`
+	ClientID            int64     `gorm:"not null" json:"client_id"`
+	Title               string    `gorm:"size:255;not null" json:"title"`
+	Description         string    `gorm:"type:text;not null" json:"description"`
+	Deadline            time.Time `gorm:"not null" json:"deadline"`
+	Budget              float64   `gorm:"not null" json:"budget"`
+	Status              string    `gorm:"size:50;not null;check:status IN ('open', 'closed', 'pending', 'awarded')" json:"status"` // Restrict status to predefined values
+	AwardedContractorID int64     `json:"awarded_contractor_id"`
 }
 
 // Bid represents the bids table.

@@ -10,6 +10,15 @@ func JWTMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenStr := c.Request.Header.Get("Authorization")
 
+		if tokenStr == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Missing token"})
+			c.Abort()
+			return
+		}
+
+		// remove Bearer prefix
+		tokenStr = tokenStr[7:]
+
 		claims, err := token.VerifyJWT(tokenStr)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})

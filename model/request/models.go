@@ -34,11 +34,7 @@ type CreateTenderReq struct {
 }
 
 type UpdateTenderReq struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Deadline    time.Time `json:"deadline"`
-	Budget      float64   `json:"budget"`
-	Status      string    `json:"status"`
+	Status string `json:"status"`
 }
 
 type CreateNotificationReq struct {

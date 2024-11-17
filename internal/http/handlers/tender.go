@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"gorm.io/gorm/utils"
 	"strconv"
 	request_model "tender-backend/model/request"
 
@@ -21,14 +22,14 @@ func (h *HTTPHandler) CreateTender(ctx *gin.Context) {
 	req := request_model.CreateTenderReq{}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(400, gin.H{"error": err.Error()})
+		ctx.JSON(400, gin.H{"message": "Invalid input"})
 		return
 	}
 
-	res, err := h.TenderService.CreateTender(&req)
+	res, err2 := h.TenderService.CreateTender(&req, ctx.GetInt64("user_id"))
 
-	if err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
+	if err2 != nil {
+		ctx.JSON(err2.StatusCode, gin.H{"message": err2.Error()})
 		return
 	}
 
@@ -98,7 +99,7 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 		return
 	}
 
-	clientID  := ctx.GetInt64("user_id")
+	clientID := ctx.GetInt64("user_id")
 
 	// Bind the request JSON to the UpdateTenderReq struct
 	req := request_model.UpdateTenderReq{}
@@ -107,17 +108,22 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 		return
 	}
 
+	availableStatus := []string{"open", "closed", "awarded"}
+	if !utils.Contains(availableStatus, req.Status) {
+		ctx.JSON(400, gin.H{"message": "Invalid tender status"})
+		return
+	}
+
 	// Call the service method
-	res, err := h.TenderService.UpdateTender(int64(tenderID), clientID, &req)
-	if err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
+	_, err2 := h.TenderService.UpdateTender(int64(tenderID), clientID, &req)
+	if err2 != nil {
+		ctx.JSON(err2.StatusCode, gin.H{"message": err2.Error()})
 		return
 	}
 
 	// Respond with the updated tender
-	ctx.JSON(200, res)
+	ctx.JSON(200, gin.H{"message": "Tender status updated"})
 }
-
 
 // DeleteTender godoc
 // @Security BearerAuth
@@ -136,12 +142,47 @@ func (h *HTTPHandler) DeleteTender(ctx *gin.Context) {
 	}
 
 	clientID := ctx.GetInt64("user_id")
-	err = h.TenderService.DeleteTender(int64(tenderID), clientID)
-	if err != nil {
-		ctx.JSON(500, gin.H{"error": err.Error()})
+	err2 := h.TenderService.DeleteTender(int64(tenderID), clientID)
+	if err2 != nil {
+		ctx.JSON(err2.StatusCode, gin.H{"message": err2.Error()})
 		return
 	}
 
 	// Respond with no content
-	ctx.Status(204)
+	ctx.JSON(200, gin.H{"message": "Tender deleted successfully"})
+}
+
+// AwardTender godoc
+// @Security BearerAuth
+// @Summary Award a tender
+// @Description Award a tender
+// @Tags Tender
+// @Accept json
+// @Produce json
+// @Param tender_id path int true "Tender ID"
+// @Param bid_id path int true "Bid ID"
+// @Success 200 {object} model.Tender
+// @Router /api/client/tenders/{tender_id}/award/{bid_id} [post]
+func (h *HTTPHandler) AwardTender(ctx *gin.Context) {
+	tenderID, err := strconv.Atoi(ctx.Param("tender_id"))
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid tender ID"})
+		return
+	}
+
+	bidID, err := strconv.Atoi(ctx.Param("bid_id"))
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": "Invalid bid ID"})
+		return
+	}
+
+	clientID := ctx.GetInt64("user_id")
+
+	err2 := h.TenderService.AwardTender(int64(tenderID), clientID, int64(bidID))
+	if err2 != nil {
+		ctx.JSON(err2.StatusCode, gin.H{"message": err2.Error()})
+		return
+	}
+
+	ctx.JSON(200, gin.H{"message": "Bid awarded successfully"})
 }

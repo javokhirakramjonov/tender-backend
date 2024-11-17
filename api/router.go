@@ -32,8 +32,6 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	swaggerUrl := ginSwagger.URL("swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler, swaggerUrl))
 
-	defHandler := func(c *gin.Context) {}
-
 	// Auth routes
 	router.POST("/login", h.Login)
 	router.POST("/register", h.Register)
@@ -45,7 +43,7 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	userGroup.DELETE("", h.DeleteUser)
 
 	// Tenders routes
-	tenderGroup := router.Group("/tenders")
+	tenderGroup := router.Group("/api/client/tenders")
 
 	// Unprotected GET routes for tenders
 	tenderGroup.GET("/:tender_id", h.GetTender) // View a specific tender
@@ -57,27 +55,28 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
 	protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
 
-	/*
-		tenderGroup.POST("", h.CreateTender)
-		tenderGroup.GET("/:id", h.GetTender)
-		tenderGroup.GET("", h.GetTenders)
-		tenderGroup.PUT("/:id", h.UpdateTender)
-		tenderGroup.DELETE("/:id", h.DeleteTender)
-	*/
 	// Bids routes
-	bidGroup := router.Group("/tenders/:tender_id/bids")
+	bidGroup := router.Group("/api/contractor/tenders/:tender_id/bid")
 
 	// Unprotected GET routes for bids
 	bidGroup.GET("/:bid_id", h.GetBid)
-	bidGroup.GET("", h.GetBids)
+
+	clientBidsGroup := router.Group("/api/client/tenders/:tender_id/bids")
+	clientBidsGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
+	clientBidsGroup.GET("", h.GetBids)
 
 	// Protected POST routes for bids
 	protectedBidGroup := bidGroup.Use(middleware.JWTMiddleware(), middleware.ContractorMiddleware())
 	protectedBidGroup.POST("", h.CreateBid)
 
+	contractorBidGroup := router.Group("/api/contractor/bids")
+	contractorBidGroup.Use(middleware.JWTMiddleware(), middleware.ContractorMiddleware())
+	contractorBidGroup.GET("", h.GetContractorBids)
+	contractorBidGroup.DELETE("/:bid_id", h.DeleteBid)
+
 	// Awards routes
-	awardGroup := tenderGroup.Group("/:tender_id/awards").Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
-	awardGroup.POST("", defHandler)
+	awardGroup := tenderGroup.Group("/:tender_id/award")
+	awardGroup.POST("/:bid_id", h.AwardTender)
 
 	return router
 }
