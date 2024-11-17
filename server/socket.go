@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sync"
 	"tender-backend/db"
+	"tender-backend/web_socket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -45,6 +46,7 @@ func (s *Server) Run() {
 	for client := range s.Register {
 		s.mu.Lock()
 		s.Clients[client] = true
+		web_socket.Clients[client.UserID] = client.Conn
 		s.mu.Unlock()
 		log.Println("Client registered with user_id: ", client.UserID)
 		go func() {

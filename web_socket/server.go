@@ -6,12 +6,12 @@ import (
 	"sync"
 )
 
-var clients = make(map[int64]*websocket.Conn) // map[user_id]connection
+var Clients = make(map[int64]*websocket.Conn) // map[user_id]connection
 var lock sync.Mutex
 
 func SendNotification(userID int64, message []byte) error {
 	lock.Lock()
-	conn, exists := clients[userID]
+	conn, exists := Clients[userID]
 	lock.Unlock()
 
 	if exists {

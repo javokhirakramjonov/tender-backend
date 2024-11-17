@@ -41,22 +41,20 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 
 	// User routes (protected)
 	userGroup := router.Group("/users").Use(middleware.JWTMiddleware())
-	{
-		userGroup.PUT("", h.UpdateUser)
-		userGroup.DELETE("", h.DeleteUser)
-	}
+
+	userGroup.PUT("", h.UpdateUser)
+	userGroup.DELETE("", h.DeleteUser)
 
 	// Tender Routes
 	tenderGroup := router.Group("/api/client/tenders")
-	{
-		tenderGroup.GET("/:tender_id", h.GetTender)
-		tenderGroup.GET("", h.GetTenders)
 
-		protectedTenderGroup := tenderGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
-		protectedTenderGroup.POST("", h.CreateTender)
-		protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
-		protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
-	}
+	tenderGroup.GET("/:tender_id", h.GetTender)
+	tenderGroup.GET("", h.GetTenders)
+
+	protectedTenderGroup := tenderGroup.Group("").Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
+	protectedTenderGroup.POST("", h.CreateTender)
+	protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
+	protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
 
 	// Bids routes
 	bidGroup := router.Group("/api/contractor/tenders/:tender_id/bid")
@@ -82,7 +80,7 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	contractorBidGroup.DELETE("/:bid_id", h.DeleteBid)
 
 	// Awards routes
-	awardGroup := tenderGroup.Group("/:tender_id/award")
+	awardGroup := tenderGroup.Group("/:tender_id/award").Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
 	awardGroup.POST("/:bid_id", h.AwardTender)
 
 	router.GET("/notifications", middleware.JWTMiddleware(), h.NotificationServer.HandleConnection)

@@ -18,7 +18,7 @@ import (
 // @Produce json
 // @Param tender body request_model.CreateTenderReq true "Tender information"
 // @Success 201 {object} model.Tender
-// @Router /tenders [post]
+// @Router /api/client/tenders [post]
 func (h *HTTPHandler) CreateTender(ctx *gin.Context) {
 	req := request_model.CreateTenderReq{}
 

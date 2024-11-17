@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"google.golang.org/protobuf/proto"
+	"log"
 	"tender-backend/custom_errors"
 	"tender-backend/gen_proto"
 	"tender-backend/model"
@@ -243,7 +244,8 @@ func (t *TenderService) AwardTender(tenderID, clientID, bidID int64) *custom_err
 			Message: ntf.Message,
 		})
 
-		rabbit_mq.Publish("notifications", queueReq)
+		err2 := rabbit_mq.Publish("notifications", queueReq)
+		log.Printf("Published notification to RabbitMQ: %v", err2)
 	}
 
 	return nil
