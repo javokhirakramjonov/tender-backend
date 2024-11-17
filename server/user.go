@@ -25,11 +25,10 @@ func (s *UserService) CreateUser(user *request_model.CreateUserReq) (*model.User
 		Email:    user.Email,
 		Role:     user.Role,
 		Username: user.Username,
-		Username: user.Username,
 	}
 
 	if _, err := s.GetByUsername(user.Email); err == nil {
-		return nil, errors.New("Email already exists")
+		return nil, errors.New("email already exists")
 	}
 
 	if err := s.db.Create(&newUser).Error; err != nil {
