@@ -21,6 +21,9 @@
 go.work
 go.work.sum
 
+# protobuf folders
+gen_proto/
+
 # generated go sum file
 go.sum
 
