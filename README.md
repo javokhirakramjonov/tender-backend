@@ -6,7 +6,7 @@ This project is a backend service designed to manage tenders, enabling clients t
 
 ### 1. Tender Registration and Management
 - **Tender Creation:** Clients can create tenders with details like title, description, opening and closing dates, and relevant requirements.
-- **Tender Lifecycle Management:** Includes functionalities to open, close, and cancel tenders based on their lifecycle stages, ensuring smooth operations.
+- **Tender Lifecycle Management:** Includes functionalities to open, and close tenders based on their lifecycle stages, ensuring smooth operations.
 
 ### 2. Bid Management
 - **Bid Submission:** Registered users can submit bids for active tenders, providing necessary details for evaluation.
@@ -88,7 +88,8 @@ make down
 - **Error Logging:** A custom logger captures application errors, providing detailed insights for debugging and monitoring.
 - **Session Management:** Redis handles session tokens for efficient and secure user authentication.
 - **Swagger:** Comprehensive API documentation is automatically generated for easy exploration of available endpoints.
-
+- **WebSockets:** WebSockets are used for real-time notifications to clients. When a notification is created, it is pushed to the corresponding user over an active WebSocket connection.
+- **RabbitMQ:** RabbitMQ handles message queuing for asynchronous processing of notifications. It ensures that notifications are reliably delivered to users.
 ---
 
 ## Contribution Guidelines
