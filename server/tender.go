@@ -4,9 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"google.golang.org/protobuf/proto"
 	"tender-backend/custom_errors"
+	"tender-backend/gen_proto"
 	"tender-backend/model"
 	request_model "tender-backend/model/request"
+	"tender-backend/rabbit_mq"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,15 +18,19 @@ import (
 )
 
 type TenderService struct {
-	db    *gorm.DB
-	redis *redis.Client
+	db                  *gorm.DB
+	redis               *redis.Client
+	NotificationService *NotificationService
+	notificationServer  *Server
 }
 
 // NewTenderService initializes a new TenderService with the database connection.
 func NewTenderService(db *gorm.DB, redisClient *redis.Client) *TenderService {
 	return &TenderService{
-		db:    db,
-		redis: redisClient,
+		db:                  db,
+		redis:               redisClient,
+		notificationServer:  NewNotificationServer(),
+		NotificationService: NewNotificationService(db),
 	}
 }
 
@@ -221,6 +229,21 @@ func (t *TenderService) AwardTender(tenderID, clientID, bidID int64) *custom_err
 		"awarded_contractor_id": bidID,
 	}).Error; err != nil {
 		return custom_errors.NewAppError(err)
+	}
+
+	ntf, _ := t.NotificationService.CreateNotification(&request_model.CreateNotificationReq{
+		UserID:  clientID,
+		Message: fmt.Sprintf("Your bid for Tender(with id: %s) has been awarded", tenderID),
+	})
+
+	if ntf != nil {
+		queueReq, _ := proto.Marshal(&gen_proto.Notification{
+			Id:      ntf.ID,
+			UserId:  ntf.UserID,
+			Message: ntf.Message,
+		})
+
+		rabbit_mq.Publish("notifications", queueReq)
 	}
 
 	return nil

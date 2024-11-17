@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
+	"github.com/redis/go-redis/v9" // Correct Redis import for v9
 	"log"
 	"tender-backend/api"
 	"tender-backend/config"
 	"tender-backend/db"
 	"tender-backend/internal/http/handlers"
-
-	"github.com/redis/go-redis/v9" // Correct Redis import for v9
+	"tender-backend/rabbit_mq"
 )
 
 var redisClient *redis.Client
@@ -24,6 +24,8 @@ func main() {
 	// Initialize Redis
 	InitRedis()
 	defer redisClient.Close()
+
+	rabbit_mq.InitRabbitMQ()
 
 	// Initialize HTTP handlers
 	h := handlers.NewHttpHandler(db.DB, redisClient)

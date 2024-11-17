@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	_ "tender-backend/docs"
 	"tender-backend/internal/http/handlers"
 	"tender-backend/internal/http/middleware"
@@ -60,7 +61,6 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	// Bids routes
 	bidGroup := router.Group("/api/contractor/tenders/:tender_id/bid")
 
-	
 	bidGroup.GET("/:bid_id", h.GetBid)
 
 	bidSubmissionRateLimit := middleware.RateLimitMiddleware(
@@ -84,6 +84,12 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	// Awards routes
 	awardGroup := tenderGroup.Group("/:tender_id/award")
 	awardGroup.POST("/:bid_id", h.AwardTender)
+
+	router.GET("/notifications", middleware.JWTMiddleware(), h.NotificationServer.HandleConnection)
+	go func() {
+		log.Println("Running notification server")
+		h.NotificationServer.Run()
+	}()
 
 	return router
 }

@@ -43,6 +43,8 @@ func (s *NotificationService) ConsumeNotifications() {
 	}
 
 	for msg := range messages {
+		log.Printf("Received a message: %s", msg.Body)
+
 		var notification gen_proto.Notification
 		if err := proto.Unmarshal(msg.Body, &notification); err != nil {
 			log.Printf("Failed to unmarshal notification: %v", err)

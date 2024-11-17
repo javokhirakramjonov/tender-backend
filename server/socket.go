@@ -1,4 +1,4 @@
-package notification
+package server
 
 import (
 	"github.com/gin-gonic/gin"
@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"sync"
 	"tender-backend/db"
-	"tender-backend/server"
 )
 
 var upgrader = websocket.Upgrader{
@@ -27,23 +26,27 @@ type Server struct {
 	Register  chan *Client
 	Broadcast chan []byte
 	mu        sync.Mutex
-	ns        *server.NotificationService
+	ns        *NotificationService
 }
 
 func NewNotificationServer() *Server {
 	return &Server{
 		Clients:  make(map[*Client]bool),
 		Register: make(chan *Client),
-		ns:       server.NewNotificationService(db.DB),
+		ns:       NewNotificationService(db.DB),
 	}
 }
 
 func (s *Server) Run() {
+	go func() {
+		s.ns.ConsumeNotifications()
+	}()
+
 	for client := range s.Register {
 		s.mu.Lock()
 		s.Clients[client] = true
 		s.mu.Unlock()
-		log.Println("Client registered")
+		log.Println("Client registered with user_id: ", client.UserID)
 		go func() {
 			err := s.ns.PublishNotDeliveredNotificationsForUser(client.UserID)
 

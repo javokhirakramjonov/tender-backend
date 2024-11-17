@@ -8,17 +8,19 @@ import (
 )
 
 type HTTPHandler struct {
-	UserService   *server.UserService
-	BidService    *server.BidService
-	TenderService *server.TenderService
-	RedisClient   *redis.Client // v9 Redis client
+	UserService        *server.UserService
+	BidService         *server.BidService
+	TenderService      *server.TenderService
+	RedisClient        *redis.Client // v9 Redis client
+	NotificationServer *server.Server
 }
 
 func NewHttpHandler(db *gorm.DB, RedisClient *redis.Client) *HTTPHandler {
 	return &HTTPHandler{
-		UserService:   server.NewUserService(db),
-		BidService:    server.NewBidService(db, RedisClient),
-		TenderService: server.NewTenderService(db, RedisClient),
-		RedisClient:   RedisClient,
+		UserService:        server.NewUserService(db),
+		BidService:         server.NewBidService(db, RedisClient),
+		TenderService:      server.NewTenderService(db, RedisClient),
+		RedisClient:        RedisClient,
+		NotificationServer: server.NewNotificationServer(),
 	}
 }
