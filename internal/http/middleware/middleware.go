@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"tender-backend/internal/http/token"
+
+	"github.com/gin-gonic/gin"
 )
 
 func JWTMiddleware() gin.HandlerFunc {

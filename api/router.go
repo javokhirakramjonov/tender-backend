@@ -4,6 +4,7 @@ import (
 	_ "tender-backend/docs"
 	"tender-backend/internal/http/handlers"
 	"tender-backend/internal/http/middleware"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	files "github.com/swaggo/files"
@@ -39,27 +40,33 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 
 	// User routes (protected)
 	userGroup := router.Group("/users").Use(middleware.JWTMiddleware())
-	userGroup.PUT("", h.UpdateUser)
-	userGroup.DELETE("", h.DeleteUser)
+	{
+		userGroup.PUT("", h.UpdateUser)
+		userGroup.DELETE("", h.DeleteUser)
+	}
 
-	// Tenders routes
+	// Tender Routes
 	tenderGroup := router.Group("/api/client/tenders")
+	{
+		tenderGroup.GET("/:tender_id", h.GetTender)
+		tenderGroup.GET("", h.GetTenders)
 
-	// Unprotected GET routes for tenders
-	tenderGroup.GET("/:tender_id", h.GetTender) // View a specific tender
-	tenderGroup.GET("", h.GetTenders)           // List all tenders
-
-	// Protected POST, PUT, DELETE routes for tenders
-	protectedTenderGroup := tenderGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
-	protectedTenderGroup.POST("", h.CreateTender)
-	protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
-	protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
+		protectedTenderGroup := tenderGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
+		protectedTenderGroup.POST("", h.CreateTender)
+		protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
+		protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
+	}
 
 	// Bids routes
 	bidGroup := router.Group("/api/contractor/tenders/:tender_id/bid")
 
-	// Unprotected GET routes for bids
+	
 	bidGroup.GET("/:bid_id", h.GetBid)
+
+	bidSubmissionRateLimit := middleware.RateLimitMiddleware(
+		5,           // Max 5 requests
+		time.Minute, // Per minute
+	)
 
 	clientBidsGroup := router.Group("/api/client/tenders/:tender_id/bids")
 	clientBidsGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
@@ -67,7 +74,7 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 
 	// Protected POST routes for bids
 	protectedBidGroup := bidGroup.Use(middleware.JWTMiddleware(), middleware.ContractorMiddleware())
-	protectedBidGroup.POST("", h.CreateBid)
+	protectedBidGroup.POST("", bidSubmissionRateLimit, h.CreateBid)
 
 	contractorBidGroup := router.Group("/api/contractor/bids")
 	contractorBidGroup.Use(middleware.JWTMiddleware(), middleware.ContractorMiddleware())
