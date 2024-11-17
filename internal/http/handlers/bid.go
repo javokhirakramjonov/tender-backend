@@ -14,6 +14,7 @@ import (
 // @Tags Bid
 // @Accept json
 // @Produce json
+// @Param tender_id path string true "Tender ID"
 // @Param bid body request_model.CreateBidReq true "Bid creation request"
 // @Success 201 {object} model.Bid "Bid created successfully"
 // @Failure 400 {object} string "Invalid request payload"
@@ -52,6 +53,7 @@ func (h *HTTPHandler) CreateBid(c *gin.Context) {
 // @Tags Bid
 // @Accept json
 // @Produce json
+// @Param tender_id path string true "Tender ID"
 // @Param bid_id path string true "Bid ID"
 // @Success 200 {object} model.Bid "Bid retrieved successfully"
 // @Failure 401 {object} string "Unauthorized"
@@ -60,14 +62,20 @@ func (h *HTTPHandler) CreateBid(c *gin.Context) {
 // @Security BearerAuth
 // @Router /tenders/{tender_id}/bids/{bid_id} [GET]
 func (h *HTTPHandler) GetBid(c *gin.Context) {
-	idStr := c.Param("bid_id")
-	id, err := strconv.Atoi(idStr)
+	bidIDStr := c.Param("bid_id")
+	bidID, err := strconv.Atoi(bidIDStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid bid ID"})
 		return
 	}
+	tenderIDStr := c.Param("tender_id")
+	tenderID, err := strconv.Atoi(tenderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tender ID"})
+		return
+	}
 
-	bid, err := h.BidService.GetBidByID(int64(id))
+	bid, err := h.BidService.GetBidByID(int64(bidID), int64(tenderID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bid"})
 		return
@@ -82,13 +90,21 @@ func (h *HTTPHandler) GetBid(c *gin.Context) {
 // @Tags Bid
 // @Accept json
 // @Produce json
+// @Param tender_id path string true "Tender ID"
 // @Success 200 {object} []model.Bid "All bids retrieved successfully"
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
 // @Router /tenders/{tender_id}/bids [get]
 func (h *HTTPHandler) GetBids(c *gin.Context) {
-	bids, err := h.BidService.GetAllBids()
+	tenderIDStr := c.Param("tender_id")
+	tenderID, err := strconv.Atoi(tenderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tender ID"})
+		return
+	}
+
+	bids, err := h.BidService.GetAllBids(int64(tenderID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve bids"})
 		return

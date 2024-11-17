@@ -50,22 +50,22 @@ func (s *BidService) CreateBid(req *request_model.CreateBidReq, tenderID int64, 
 	return &newBid, nil
 }
 
-func (s *BidService) GetBidByID(id int64) (*model.Bid, error) {
+func (s *BidService) GetBidByID(bidID, tenderID int64) (*model.Bid, error) {
 	var bid model.Bid
-	if err := s.db.First(&bid, id).Error; err != nil {
+	if err := s.db.Where("id = ? AND tender_id = ?", bidID, tenderID).First(&bid).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("bid not found")
 		}
-		return nil, fmt.Errorf("failed to retrieve bid:" + err.Error())
+		return nil, fmt.Errorf("failed to retrieve bid: %s", err.Error())
 	}
 
 	return &bid, nil
 }
 
-func (s *BidService) GetAllBids() ([]model.Bid, error) {
+func (s *BidService) GetAllBids(tenderID int64) ([]model.Bid, error) {
 	var bids []model.Bid
-	if err := s.db.Find(&bids).Error; err != nil {
-		return nil, err
+	if err := s.db.Where("tender_id = ?", tenderID).Find(&bids).Error; err != nil {
+		return nil, fmt.Errorf("failed to retrieve bids: %s", err.Error())
 	}
 
 	return bids, nil
