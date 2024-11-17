@@ -60,7 +60,6 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	// Bids routes
 	bidGroup := router.Group("/api/contractor/tenders/:tender_id/bid")
 
-	
 	bidGroup.GET("/:bid_id", h.GetBid)
 
 	bidSubmissionRateLimit := middleware.RateLimitMiddleware(
