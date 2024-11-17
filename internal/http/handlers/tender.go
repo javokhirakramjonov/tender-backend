@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"gorm.io/gorm/utils"
 	"strconv"
 	request_model "tender-backend/model/request"
+
+	"gorm.io/gorm/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +45,7 @@ func (h *HTTPHandler) CreateTender(ctx *gin.Context) {
 // @Produce json
 // @Param tender_id path int true "Tender ID"
 // @Success 200 {object} model.Tender
-// @Router /tenders/{tender_id} [get]
+// @Router /api/client/tenders/{tender_id} [get]
 func (h *HTTPHandler) GetTender(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("tender_id"))
 	if err != nil {
@@ -68,7 +69,7 @@ func (h *HTTPHandler) GetTender(ctx *gin.Context) {
 // @Tags Tender
 // @Produce json
 // @Success 200 {object} []model.Tender
-// @Router /tenders [get]
+// @Router /api/client/tenders [get]
 func (h *HTTPHandler) GetTenders(ctx *gin.Context) {
 	res, err := h.TenderService.GetTenders()
 
@@ -90,7 +91,7 @@ func (h *HTTPHandler) GetTenders(ctx *gin.Context) {
 // @Param tender_id path int true "Tender ID"
 // @Param tender body request_model.UpdateTenderReq true "Tender information"
 // @Success 200 {object} model.Tender
-// @Router /tenders/{tender_id} [put]
+// @Router /api/client/tenders/{tender_id} [put]
 func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 	// Get tender ID from the path
 	tenderID, err := strconv.Atoi(ctx.Param("tender_id"))
@@ -132,7 +133,7 @@ func (h *HTTPHandler) UpdateTender(ctx *gin.Context) {
 // @Tags Tender
 // @Param tender_id path int true "Tender ID"
 // @Success 204
-// @Router /tenders/{tender_id} [delete]
+// @Router /api/client/tenders/{tender_id} [delete]
 func (h *HTTPHandler) DeleteTender(ctx *gin.Context) {
 	// Get tender ID from the path
 	tenderID, err := strconv.Atoi(ctx.Param("tender_id"))

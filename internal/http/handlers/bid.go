@@ -21,7 +21,7 @@ import (
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
-// @Router /tenders/{tender_id}/bids [POST]
+// @Router /api/contractor/tenders/{tender_id}/bid [POST]
 func (h *HTTPHandler) CreateBid(c *gin.Context) {
 	var req request_model.CreateBidReq
 	tenderIdStr := c.Param("tender_id")
@@ -60,7 +60,7 @@ func (h *HTTPHandler) CreateBid(c *gin.Context) {
 // @Failure 404 {object} string "Bid not found"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
-// @Router /tenders/{tender_id}/bids/{bid_id} [GET]
+// @Router /api/contractor/tenders/{tender_id}/bid/{bid_id} [GET]
 func (h *HTTPHandler) GetBid(c *gin.Context) {
 	bidIDStr := c.Param("bid_id")
 	bidID, err := strconv.Atoi(bidIDStr)
@@ -95,7 +95,7 @@ func (h *HTTPHandler) GetBid(c *gin.Context) {
 // @Failure 401 {object} string "Unauthorized"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
-// @Router /tenders/{tender_id}/bids [get]
+// @Router /api/client/contractor/tenders/{tender_id}/bids [get]
 func (h *HTTPHandler) GetBids(c *gin.Context) {
 	tenderIDStr := c.Param("tender_id")
 	tenderID, err := strconv.Atoi(tenderIDStr)
@@ -147,7 +147,7 @@ func (h *HTTPHandler) GetContractorBids(c *gin.Context) {
 // @Failure 404 {object} string "Bid not found"
 // @Failure 500 {object} string "Server error"
 // @Security BearerAuth
-// @Router /bids/{bid_id} [DELETE]
+// @Router /api/contractor/bids/{bid_id} [DELETE]
 func (h *HTTPHandler) DeleteBid(c *gin.Context) {
 	bidIDStr := c.Param("bid_id")
 	bidID, err := strconv.Atoi(bidIDStr)
