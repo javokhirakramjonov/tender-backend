@@ -6,6 +6,7 @@ import (
 	"tender-backend/config"
 	"tender-backend/internal/http/token"
 	request_model "tender-backend/model/request"
+	response_model "tender-backend/model/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param user body request_model.CreateUserReq true "User registration request"
-// @Success 201 {object} token.Tokens "JWT tokens"
+// @Success 201 {object} response_model.LoginRes "JWT tokens"
 // @Failure 400 {object} string "Invalid request payload"
 // @Failure 500 {object} string "Server error"
 // @Router /register [post]
@@ -48,10 +49,19 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 		return
 	}
 
-	tkn := token.GenerateJWTToken(user.ID, user.Role)
+	tkn, err := token.GenerateJWT(user.ID, user.Role)
 
-	fmt.Println("New account registered to the system: ", req.Email)
-	c.JSON(http.StatusCreated, tkn)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	res := response_model.LoginRes{
+		Token: tkn,
+		Role:  user.Role,
+	}
+
+	c.JSON(200, res)
 }
 
 // Login godoc
@@ -61,7 +71,7 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param credentials body request_model.LoginUserReq true "User login credentials"
-// @Success 200 {object} token.Tokens "JWT tokens"
+// @Success 200 {object} response_model.LoginRes "JWT tokens"
 // @Failure 400 {object} string "Invalid request payload"
 // @Failure 401 {object} string "Invalid email or password"
 // @Router /login [post]
@@ -84,7 +94,17 @@ func (h *HTTPHandler) Login(c *gin.Context) {
 		return
 	}
 
-	tkn := token.GenerateJWTToken(user.ID, user.Role)
+	tkn, err := token.GenerateJWT(user.ID, user.Role)
 
-	c.JSON(http.StatusOK, tkn)
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	res := response_model.LoginRes{
+		Token: tkn,
+		Role:  user.Role,
+	}
+
+	c.JSON(200, res)
 }

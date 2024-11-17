@@ -1,50 +1,44 @@
 package token
 
 import (
-	"errors"
-	"log"
+	"fmt"
+	jwt "github.com/golang-jwt/jwt"
 	"tender-backend/config"
 	"time"
-
-	"github.com/golang-jwt/jwt"
 )
 
-type Tokens struct {
-	AccessToken string `json:"access_token"`
+type Claims struct {
+	UserID int64  `json:"user_id"`
+	Role   string `json:"role"`
+	jwt.StandardClaims
 }
 
-func GenerateJWTToken(userID int64, role string) *Tokens {
-	accessToken := jwt.New(jwt.SigningMethodHS256)
-	claims := accessToken.Claims.(jwt.MapClaims)
-	claims["user_id"] = userID
-	claims["role"] = role
-	claims["iat"] = time.Now().Unix()
-	claims["exp"] = time.Now().Add(24 * time.Hour).Unix() // Token expires in 24 hours
-	access, err := accessToken.SignedString([]byte(config.GlobalConfig.SecretKey))
-	if err != nil {
-		log.Fatal("error while generating access token : ", err)
+func GenerateJWT(userID int64, role string) (string, error) {
+	expirationTime := time.Now().Add(24 * time.Hour)
+
+	claims := &Claims{
+		UserID: userID,
+		Role:   role,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
 	}
 
-	return &Tokens{
-		AccessToken: access,
-	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(config.GlobalConfig.SecretKey)
 }
 
-func ExtractClaim(tokenStr string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.GlobalConfig.SecretKey), nil
+func VerifyJWT(tokenStr string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return config.GlobalConfig.SecretKey, nil
 	})
+
 	if err != nil {
-		return nil, errors.New("parsing token:" + err.Error())
+		return nil, err
 	}
 	if !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, fmt.Errorf("invalid token")
 	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, errors.New("invalid token")
-	}
-
 	return claims, nil
 }

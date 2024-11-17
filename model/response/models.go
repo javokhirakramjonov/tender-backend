@@ -6,3 +6,8 @@ type ProfileRes struct {
 	Email    string `json:"email"`
 	Role     string `json:"role"`
 }
+
+type LoginRes struct {
+	Token string `json:"token"`
+	Role  string `json:"role"`
+}

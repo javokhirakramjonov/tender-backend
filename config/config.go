@@ -19,7 +19,7 @@ type DBConfig struct {
 
 type Config struct {
 	DB        DBConfig
-	SecretKey string
+	SecretKey []byte
 	AppPort   string
 }
 
@@ -32,7 +32,7 @@ func LoadConfig() {
 	}
 
 	GlobalConfig = &Config{
-		SecretKey: os.Getenv("JWT_SECRET_KEY"),
+		SecretKey: []byte(os.Getenv("JWT_SECRET_KEY")),
 		DB: DBConfig{
 			DBHost:     os.Getenv("DB_HOST"),
 			DBPort:     os.Getenv("DB_PORT"),
