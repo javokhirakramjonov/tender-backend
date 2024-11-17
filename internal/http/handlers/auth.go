@@ -29,8 +29,13 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 		return
 	}
 
+	if req.Email == "" || req.Username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "username or email cannot be empty"})
+		return
+	}
+
 	if !config.IsValidEmail(req.Email) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid email"})
 		return
 	}
 
@@ -61,7 +66,7 @@ func (h *HTTPHandler) Register(c *gin.Context) {
 		Role:  user.Role,
 	}
 
-	c.JSON(200, res)
+	c.JSON(201, res)
 }
 
 // Login godoc

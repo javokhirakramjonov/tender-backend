@@ -11,6 +11,7 @@ type User struct {
 	Password string `gorm:"size:255;not null" json:"password"`
 	Role     string `gorm:"size:50;not null;check:role IN ('client', 'contractor')" json:"role"` // Restrict role to "client" or "contractor"
 	Email    string `gorm:"size:255;not null;unique" json:"email"`
+	Username string `gorm:"size:255;not null;unique" json:"username"`
 }
 
 // Tender represents the tenders table.

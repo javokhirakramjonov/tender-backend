@@ -6,6 +6,7 @@ type CreateUserReq struct {
 	FullName string `json:"full_name"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
+	Username string `json:"username"`
 	Role     string `json:"role"`
 }
 
@@ -26,18 +27,18 @@ type CreateBidReq struct {
 }
 
 type CreateTenderReq struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
 	Deadline    time.Time `json:"deadline"`
-	Budget      float64 `json:"budget"`
+	Budget      float64   `json:"budget"`
 }
 
 type UpdateTenderReq struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
 	Deadline    time.Time `json:"deadline"`
-	Budget      float64 `json:"budget"`
-	Status      string `json:"status"`
+	Budget      float64   `json:"budget"`
+	Status      string    `json:"status"`
 }
 
 type CreateNotificationReq struct {
