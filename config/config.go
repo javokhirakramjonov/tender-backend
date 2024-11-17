@@ -17,10 +17,16 @@ type DBConfig struct {
 	TimeZone   string
 }
 
+type RedisConfig struct {
+	RedisAddr string
+	RedisPass string
+}
+
 type Config struct {
 	DB        DBConfig
 	SecretKey []byte
 	AppPort   string
+	Redis     RedisConfig
 }
 
 var GlobalConfig *Config
@@ -41,6 +47,10 @@ func LoadConfig() {
 			DBName:     os.Getenv("DB_NAME"),
 			SSLMode:    os.Getenv("DB_SSL_MODE"),
 			TimeZone:   os.Getenv("DB_TIMEZONE"),
+		},
+		Redis: RedisConfig{
+			RedisAddr: os.Getenv("REDIS_ADDR"),
+			RedisPass: os.Getenv("REDIS_PASS"),
 		},
 		AppPort: os.Getenv("APP_PORT"),
 	}
