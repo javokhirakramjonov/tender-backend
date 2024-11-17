@@ -1,9 +1,11 @@
 package api
 
 import (
+	"fmt"
 	_ "tender-backend/docs"
 	"tender-backend/internal/http/handlers"
 	"tender-backend/internal/http/middleware"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	files "github.com/swaggo/files"
@@ -32,52 +34,51 @@ func NewGinRouter(h *handlers.HTTPHandler) *gin.Engine {
 	swaggerUrl := ginSwagger.URL("swagger/doc.json")
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(files.Handler, swaggerUrl))
 
-	defHandler := func(c *gin.Context) {}
+	// Authentication Routes (Public)
+	authGroup := router.Group("/")
+	{
+		authGroup.POST("/login", h.Login)
+		authGroup.POST("/register", h.Register)
+		authGroup.GET("/users/:user_id", h.GetUserByID)
+	}
 
-	// Auth routes
-	router.POST("/login", h.Login)
-	router.POST("/register", h.Register)
-	router.GET("/users/:user_id", h.GetUserByID)
-
-	// User routes (protected)
+	// User Routes (Protected with JWT Middleware)
 	userGroup := router.Group("/users").Use(middleware.JWTMiddleware())
-	userGroup.PUT("", h.UpdateUser)
-	userGroup.DELETE("", h.DeleteUser)
+	{
+		userGroup.PUT("", h.UpdateUser)
+		userGroup.DELETE("", h.DeleteUser)
+	}
 
-	// Tenders routes
+	// Tender Routes
 	tenderGroup := router.Group("/tenders")
-
-	// Unprotected GET routes for tenders
-	tenderGroup.GET("/:tender_id", h.GetTender) // View a specific tender
-	tenderGroup.GET("", h.GetTenders)           // List all tenders
-
-	// Protected POST, PUT, DELETE routes for tenders
-	protectedTenderGroup := tenderGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
-	protectedTenderGroup.POST("", h.CreateTender)
-	protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
-	protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
-
-	/*
-		tenderGroup.POST("", h.CreateTender)
-		tenderGroup.GET("/:id", h.GetTender)
+	{
+		tenderGroup.GET("/:tender_id", h.GetTender)
 		tenderGroup.GET("", h.GetTenders)
-		tenderGroup.PUT("/:id", h.UpdateTender)
-		tenderGroup.DELETE("/:id", h.DeleteTender)
-	*/
-	// Bids routes
+
+		protectedTenderGroup := tenderGroup.Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
+		protectedTenderGroup.POST("", h.CreateTender)
+		protectedTenderGroup.PUT("/:tender_id", h.UpdateTender)
+		protectedTenderGroup.DELETE("/:tender_id", h.DeleteTender)
+	}
+
+	// Bid Routes
 	bidGroup := router.Group("/tenders/:tender_id/bids")
+	{
+		bidSubmissionRateLimit := middleware.RateLimitMiddleware(
+			func(c *gin.Context) string {
+				userID := c.GetString("userID") // Assumes userID is set by JWTMiddleware
+				return fmt.Sprintf("bid-submissions-%s", userID)
+			},
+			2,           // Max 5 requests
+			time.Minute, // Per minute
+		)
 
-	// Unprotected GET routes for bids
-	bidGroup.GET("/:bid_id", h.GetBid)
-	bidGroup.GET("", h.GetBids)
+		bidGroup.GET("/:bid_id", h.GetBid)
+		bidGroup.GET("", h.GetBids)
 
-	// Protected POST routes for bids
-	protectedBidGroup := bidGroup.Use(middleware.JWTMiddleware(), middleware.ContractorMiddleware())
-	protectedBidGroup.POST("", h.CreateBid)
-
-	// Awards routes
-	awardGroup := tenderGroup.Group("/:tender_id/awards").Use(middleware.JWTMiddleware(), middleware.ClientMiddleware())
-	awardGroup.POST("", defHandler)
+		protectedBidGroup := bidGroup.Use(middleware.JWTMiddleware(), middleware.ContractorMiddleware())
+		protectedBidGroup.POST("", bidSubmissionRateLimit, h.CreateBid)
+	}
 
 	return router
 }

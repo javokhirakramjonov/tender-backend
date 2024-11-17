@@ -39,8 +39,6 @@ func (t *TenderService) CreateTender(req *request_model.CreateTenderReq) (*model
 		return nil, err
 	}
 
-
-
 	return tender, nil
 }
 
@@ -111,7 +109,6 @@ func (t *TenderService) UpdateTender(tenderID, clientID int64, req *request_mode
 	return &tender, nil
 }
 
-
 func ValidateTenderUpdate(existingStatus, newStatus string, deadline time.Time, budget float64) error {
 	// Reject updates if the existing status is not "open"
 	if existingStatus != "open" {
@@ -135,9 +132,6 @@ func ValidateTenderUpdate(existingStatus, newStatus string, deadline time.Time, 
 
 	return nil
 }
-
-
-
 
 // DeleteTender deletes a tender by its ID.
 func (t *TenderService) DeleteTender(tenderID, clientID int64) error {

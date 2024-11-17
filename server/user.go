@@ -24,6 +24,7 @@ func (s *UserService) CreateUser(user *request_model.CreateUserReq) (*model.User
 		Password: user.Password,
 		Email:    user.Email,
 		Role:     user.Role,
+		Username: user.Username,
 	}
 
 	if err := s.db.Create(&newUser).Error; err != nil {
