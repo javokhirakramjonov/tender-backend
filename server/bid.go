@@ -17,14 +17,14 @@ import (
 type BidService struct {
 	db            *gorm.DB
 	tenderService *TenderService
-	redis *redis.Client
+	redis         *redis.Client
 }
 
-func NewBidService(db *gorm.DB) *BidService {
+func NewBidService(db *gorm.DB, redisClient *redis.Client) *BidService {
 	return &BidService{
 		db:            db,
-		tenderService: NewTenderService(db),
-		redis: redisClient,
+		tenderService: NewTenderService(db, redisClient),
+		redis:         redisClient,
 	}
 }
 
@@ -104,8 +104,8 @@ func (s *BidService) GetAllBids(tenderID int64) ([]model.Bid, *custom_errors.App
 	cacheKey := fmt.Sprintf("bids_tender_%d", tenderID)
 
 	// Check Redis cache
-	cachedBids, err := s.redis.Get(ctx, cacheKey).Result()
-	if err == nil {
+	cachedBids, err2 := s.redis.Get(ctx, cacheKey).Result()
+	if err2 == nil {
 		// Cache hit: return cached bids
 		var bids []model.Bid
 		if err := json.Unmarshal([]byte(cachedBids), &bids); err == nil {
@@ -140,10 +140,6 @@ func (s *BidService) GetContractorBids(contractorID int64) ([]model.Bid, error) 
 	if err := s.db.Where("contractor_id = ?", contractorID).Find(&bids).Error; err != nil {
 		return nil, fmt.Errorf("failed to retrieve bids: %s", err.Error())
 	}
-
-	// Cache the result
-	bidsJSON, _ := json.Marshal(bids)
-	_ = s.redis.Set(ctx, cacheKey, bidsJSON, 10*time.Minute).Err()
 
 	return bids, nil
 }

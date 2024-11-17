@@ -2,11 +2,11 @@
 
 # Command to run PostgreSQL using Docker Compose
 run-db:
-	docker-compose up -d db
+	docker-compose up -d db redis
 
 # Command to build and run the Go app using Docker Compose
 run:
-	docker-compose up -d app
+	docker-compose up -d app --build
 
 local-run:
 	go run ./cmd/main.go
