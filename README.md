@@ -20,10 +20,9 @@ This project is a backend service designed to manage tenders, enabling clients t
 - **Authentication:** Secure user authentication using modern encryption standards.
 - **Data Validation:** Input validation is enforced across all endpoints to ensure data integrity and security.
 
-### 5. Documentation and Testing
+### 5. Documentation
 - **Swagger API Documentation:** Provides interactive and detailed API documentation for seamless integration with frontend or external systems.
-- **Unit Tests:** Comprehensive testing ensures the reliability of core functionalities.
-
+- 
 ## Technical Stack
 
 - **Programming Language:** Golang (chosen for its scalability and efficiency).
@@ -69,14 +68,10 @@ The backend API will be available at `http://localhost:[PORT]`, where `PORT` is 
 
 ## Development Workflow
 
-### Run Tests:
-```bash
-make test
-```
 
 ### Stop and Clean Services:
 ```bash
-make down
+make stop
 ```
 
 ---
